@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "agl-skills",
+  "description": "AnguLess engineering skills for AI coding agents — persistent project brain (state + memory + sessions) plus senior-engineer discipline (spec, plan, build, debug, test, review, ship).",
+  "owner": {
+    "name": "trungnghia112",
+    "url": "https://github.com/trungnghia112"
+  },
+  "plugins": [
+    {
+      "name": "agl-skills",
+      "source": {
+        "source": "github",
+        "repo": "trungnghia112/agl-skills"
+      },
+      "description": "Persistent project brain with senior-engineer discipline (TDD, evidence-based verification, scope control). Explicit /agl-* commands only — nothing auto-activates.",
+      "homepage": "https://github.com/trungnghia112/agl-skills",
+      "license": "MIT",
+      "keywords": ["skills", "agents", "anguless", "brain", "tdd", "review", "ship"]
+    }
+  ]
+}

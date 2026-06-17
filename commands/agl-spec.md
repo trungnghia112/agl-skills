@@ -34,8 +34,8 @@ relevant memories (prior decisions, preferences) before asking anything.
 6. Update `.agl/STATE.md` `## Now` (spec in progress → done). End with:
 
 ```
-1️⃣ /agl-plan — bẻ spec này thành task
-2️⃣ Chỉnh spec — nói điểm cần sửa
-3️⃣ /agl-build auto — gộp plan + build chạy một mạch
+1️⃣ /agl-plan — break this spec into tasks
+2️⃣ Edit spec — tell me what to change
+3️⃣ /agl-build auto — plan + build in one pass
 ```
 with one explicit recommendation.

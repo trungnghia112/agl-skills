@@ -30,7 +30,7 @@ checkpoint. Check BRAIN.md for gotchas/runbook relevant to the files touched
    stop, ask the owner to commit/stash. Per-task commits must not absorb
    strangers' diffs or the clean-revert guarantee breaks.
 3. **Single checkpoint**: present the full plan, wait for an unambiguous yes
-   ("approve"/"go"/"ok làm đi"). Hedged answers are not approval.
+   ("approve"/"go"/"do it"). Hedged answers are not approval.
 4. Execute every task in dependency order through the per-task loop.
 5. **Hard stops mid-run** (report and wait — do not push through):
    - a `risk:`-tagged task is next (payments/auth/irreversible/secrets)

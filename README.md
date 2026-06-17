@@ -1,60 +1,61 @@
 # agl-skills
 
-Bộ skill `/agl-*` cho Claude Code: **bộ nhớ dự án bền vững** (state +
-memory + sessions) gắn với **kỷ luật kỹ thuật senior engineer** (TDD,
-bằng chứng bắt buộc, kiểm soát scope). Chỉ kích hoạt bằng lệnh tường minh
-`/agl-*` — không có gì tự chạy nền.
+`/agl-*` skills for Claude Code: a **persistent project brain** (state +
+memory + sessions) paired with **senior-engineer discipline** (TDD,
+mandatory evidence, scope control). Everything is triggered by explicit
+`/agl-*` commands — nothing runs in the background.
 
-## Triết lý
+## Philosophy
 
-| Bộ nhớ dự án | Kỷ luật kỹ thuật |
+| Project memory | Engineering discipline |
 |---|---|
-| Brain xuyên session (recap/save) | TDD: test đỏ trước, code xanh sau |
-| Backlog có ID, watchlist hẹn ngày | Bằng chứng bắt buộc, không "trông có vẻ đúng" |
-| Menu số + đúng 1 gợi ý | Nêu giả định, dừng khi bí, dám phản biện |
-| Giọng product-owner, tiếng của user | Kỷ luật scope, commit phẫu thuật, clean revert |
-| `/agl-next` gợi việc từ backlog | `auto` mode 1 lần duyệt + hard stop ở task rủi ro |
+| Cross-session brain (recap/save) | TDD: red test first, green code after |
+| Backlog with IDs, dated watchlist | Evidence required, never "looks right" |
+| Numbered menus + exactly one recommendation | State assumptions, stop when stuck, push back |
+| Product-owner voice, in the user's language | Scope discipline, surgical commits, clean revert |
+| `/agl-next` suggests work from the backlog | `auto` mode: approve once + hard-stop on risky tasks |
 
 ## Brain v2 — O(1) recap
 
-Mô hình theo Claude Memory, không dồn tất cả vào một file monolith:
+Modeled on Claude Memory, not a single monolithic file:
 
-- **`.agl/STATE.md`** — nhỏ (≤150 dòng), luôn đọc: đang làm gì, backlog, watchlist.
-  Frontmatter có `last_commit` → recap chạy `git log <anchor>..HEAD`,
-  **phát hiện stale bằng máy** thay vì tin note cũ.
-- **`.agl/memory/`** — mỗi fact một file (gotcha/decision/learning/runbook/
-  preference), có description để recall đúng lúc; update chứ không nhân bản,
-  sai thì xóa. Index một-dòng-một-file ở `BRAIN.md`.
-- **`.agl/sessions/`** — nhật ký append-only theo ngày; lịch sử nằm đây,
-  không bao giờ phải đọc cả cụm.
+- **`.agl/STATE.md`** — small (≤150 lines), always read: what's in flight,
+  backlog, watchlist. Frontmatter carries `last_commit` → recap runs
+  `git log <anchor>..HEAD` to **detect staleness mechanically** instead of
+  trusting old notes.
+- **`.agl/memory/`** — one fact per file (gotcha/decision/learning/runbook/
+  preference), each with a description for just-in-time recall; update rather
+  than duplicate, delete when wrong. One-line-per-file index in `BRAIN.md`.
+- **`.agl/sessions/`** — append-only daily log; history lives here and is
+  never read as a whole.
 
-→ Chi phí recap là **O(1)** bất kể project bao nhiêu tuổi.
+→ Recap cost is **O(1)** regardless of how old the project gets.
 
-## Cài & dùng
+## Install & use
 
-Cài qua marketplace:
+Install via the marketplace:
 
 ```
 /plugin marketplace add trungnghia112/agl-skills
 /plugin install agl-skills@agl-skills
 ```
 
-Sau khi cài: `/agl-init` trong project → `/agl-help` xem hướng dẫn. Tất cả
-lệnh đều tường minh `/agl-*`, không có gì tự kích hoạt.
+After installing: run `/agl-init` in your project → `/agl-help` for the
+overview. Every command is an explicit `/agl-*` — nothing auto-activates.
 
 ```
-sáng:  /agl-recap
-làm:   /agl-spec → /agl-plan → /agl-build auto → /agl-review
-xong:  /agl-ship   (brain tự lưu khi ship; /agl-save khi dừng giữa chừng)
+morning:  /agl-recap
+working:  /agl-spec → /agl-plan → /agl-build auto → /agl-review
+done:     /agl-ship   (brain saves itself on ship; /agl-save when stopping mid-stream)
 ```
 
-## Cấu trúc
+## Structure
 
 ```
 agl-skills/
 ├── .claude-plugin/plugin.json
-├── commands/        # 13 lệnh /agl-*  (chỉ load khi gọi — gần 0 token nền)
+├── commands/        # 13 /agl-* commands (loaded only when invoked — near-zero background tokens)
 └── references/
-    ├── core-behaviors.md   # quy tắc lõi mọi lệnh phải theo
-    └── brain-format.md     # spec .agl/ + quy tắc memory
+    ├── core-behaviors.md   # core rules every command follows
+    └── brain-format.md     # .agl/ spec + memory rules
 ```

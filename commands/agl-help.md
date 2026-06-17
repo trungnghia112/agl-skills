@@ -9,40 +9,40 @@ if `$ARGUMENTS` asks something specific:
 
 | Memory | |
 |---|---|
-| `/agl-init` | Dựng brain `.agl/` cho project |
-| `/agl-recap` | Nhớ lại trạng thái — luôn đối chiếu git, không tin note cũ |
-| `/agl-save` | Lưu phiên: session log + memory (mỗi fact 1 file) + STATE |
+| `/agl-init` | Scaffold the `.agl/` brain for this project |
+| `/agl-recap` | Recall state — always reconcile against git, never trust stale notes |
+| `/agl-save` | Save the session: session log + memory (one fact per file) + STATE |
 
 | Lifecycle | |
 |---|---|
-| `/agl-spec <ý tưởng>` | Phỏng vấn từng câu → spec có acceptance criteria |
-| `/agl-plan` | Bẻ spec thành task nhỏ kiểm chứng được, tag rủi ro |
-| `/agl-build` | TDD từng task: test đỏ → code xanh → suite → commit → dừng |
-| `/agl-build auto` | Duyệt 1 lần → chạy cả plan, tự dừng ở task rủi ro |
-| `/agl-test` | Vá lỗ hổng test + chạy suite + UAT sống khi cần |
-| `/agl-review` | Review 5 trục, mỗi finding bị phản biện trước khi báo |
-| `/agl-audit` | Security/deps/perf — risk-accept bắt buộc có trigger hẹn lại |
-| `/agl-debug` | Reproduce → khoanh vùng → fix → test chặn tái phát |
-| `/agl-ship` | Gate đủ bằng chứng → changelog → push → tự save brain |
-| `/agl-next` | Gợi ý việc tiếp theo từ backlog (kiểm git trước khi gợi ý) |
+| `/agl-spec <idea>` | Interview one question at a time → spec with acceptance criteria |
+| `/agl-plan` | Break the spec into small verifiable tasks, tag the risky ones |
+| `/agl-build` | TDD per task: red test → green code → suite → commit → stop |
+| `/agl-build auto` | Approve once → run the whole plan, auto-stop at risky tasks |
+| `/agl-test` | Plug test gaps + run the suite + live UAT when needed |
+| `/agl-review` | Five-axis review, every finding challenged before it's reported |
+| `/agl-audit` | Security/deps/perf — every risk-accept needs a dated re-report trigger |
+| `/agl-debug` | Reproduce → isolate → fix → add a test that blocks regression |
+| `/agl-ship` | Gate on evidence → changelog → push → auto-save the brain |
+| `/agl-next` | Suggest the next task from the backlog (check git before suggesting) |
 
 ## Typical day
 
 ```
-sáng:  /agl-recap            → nhớ lại, chọn việc từ menu
-làm:   /agl-spec → /agl-plan → /agl-build auto → /agl-review
-xong:  /agl-ship             → brain tự lưu trong lúc ship
-(/agl-save chỉ cần gọi riêng khi dừng giữa chừng không ship)
+morning:  /agl-recap            → recall, pick work from the menu
+working:  /agl-spec → /agl-plan → /agl-build auto → /agl-review
+done:     /agl-ship             → brain saves itself during ship
+(/agl-save only needed when you stop mid-stream without shipping)
 ```
 
-## Nguyên tắc lõi (luôn áp dụng trong mọi lệnh)
+## Core principles (always applied in every command)
 
-- Nêu giả định trước khi làm; bí thì DỪNG và hỏi, không đoán
-- Được phép phản biện owner khi approach có vấn đề cụ thể
-- "Trông có vẻ đúng" không bao giờ đủ — phải có bằng chứng (số test, build,
-  UAT sống); UI/IPC bắt buộc kiểm tra trên app thật
-- Đụng tiền / auth / xóa data / không-revert-được → dừng xin sign-off
-- Brain: mỗi fact 1 file, update chứ không nhân bản, sai thì xóa,
-  nhớ lại thì phải verify với code hiện tại trước khi tin
+- State assumptions before acting; when stuck, STOP and ask — never guess
+- Allowed to push back on the owner when an approach has a concrete problem
+- "Looks right" is never enough — evidence required (test counts, build,
+  live UAT); UI/IPC changes must be checked in the real app
+- Money / auth / data deletion / anything not undoable → stop for sign-off
+- Brain: one fact per file, update don't duplicate, delete when wrong,
+  verify a recalled memory against current code before trusting it
 
-Brain format chi tiết: `references/brain-format.md` trong plugin này.
+Detailed brain format: `references/brain-format.md` in this plugin.

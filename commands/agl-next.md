@@ -17,7 +17,7 @@ Read `${CLAUDE_PLUGIN_ROOT}/references/core-behaviors.md` (once per session).
    stays parked; a "needs decision" item becomes a decision option).
 
 3. Present 2–4 options as a numbered menu: each option = outcome framing
-   ("làm X → được Y") + effort feel (quick / one-session / multi-session).
+   ("ship X → get Y") + effort feel (quick / one-session / multi-session).
    Bundle naturally-sequential items into one "do them all" option.
    Exactly ONE recommendation with a one-line reason.
 

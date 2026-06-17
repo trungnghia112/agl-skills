@@ -27,8 +27,8 @@ Read `${CLAUDE_PLUGIN_ROOT}/references/core-behaviors.md` and
 5. Report what was created, then end with the standard menu:
 
 ```
-1️⃣ /agl-recap — xem lại trạng thái vừa dựng
-2️⃣ /agl-spec <ý tưởng> — bắt đầu feature đầu tiên
-3️⃣ /agl-next — gợi ý việc tiếp theo từ backlog
+1️⃣ /agl-recap — review the state just created
+2️⃣ /agl-spec <idea> — start your first feature
+3️⃣ /agl-next — suggest the next task from the backlog
 ```
 with one explicit recommendation.

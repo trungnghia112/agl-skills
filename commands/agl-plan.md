@@ -31,8 +31,8 @@ Read `${CLAUDE_PLUGIN_ROOT}/references/core-behaviors.md` (once per session).
    tracked feature). End with:
 
 ```
-1️⃣ /agl-build — làm task đầu tiên (từng bước, chắc chắn)
-2️⃣ /agl-build auto — duyệt 1 lần, chạy cả plan
-3️⃣ Chỉnh plan — nói task cần sửa
+1️⃣ /agl-build — do the first task (step by step, carefully)
+2️⃣ /agl-build auto — approve once, run the whole plan
+3️⃣ Edit plan — tell me which task to change
 ```
 with one explicit recommendation.

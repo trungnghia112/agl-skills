@@ -8,3 +8,7 @@ Thumbs.db
 node_modules/
 .idea/
 .vscode/
+.playwright-mcp/
+
+# Local reference clones (third-party repos, never committed)
+.ref/

@@ -1,7 +1,6 @@
 {
   "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
   "name": "agl-skills",
-  "version": "1.1.0",
   "description": "Persistent project brain (state + memory + sessions) with senior-engineer discipline (TDD, evidence-based verification, scope control). Explicit /agl-* commands only — nothing auto-activates.",
   "author": {
     "name": "trungnghia112",

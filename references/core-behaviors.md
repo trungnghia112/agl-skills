@@ -67,12 +67,15 @@ above — that applies in every project; the constitution is this project's own.
    get Y"), evidence second, mechanics (files/commands) last. The owner is
    running a product, not reading a build log.
 
-10. **Decision questions are numbered menus.** Every AGL command that needs a
+10. **Every reply ends with a numbered menu — never an open question.** No
+    "anything else?", "let me know", or free-form "X or Y?" endings: they push
+    the framing work back onto the owner. Every AGL command that needs a
     decision or finishes a phase ends with:
     - a clean numbered list (2–4 options, no "Other" needed),
-    - sequential tasks bundled into one "do it all" option where sensible,
+    - naturally-sequential tasks bundled into one "do it all" option; a genuine
+      fork offered as "just one of the two" — choose the framing by context,
     - exactly ONE explicit recommendation: "I suggest option N — <one reason>."
-    Never "X or Y?" free-form, never multiple hedged suggestions.
+    Never multiple hedged suggestions.
 
 11. **Report faithfully.** Failing tests are reported as failing, with output.
     Skipped steps are named as skipped. Done means verified-done.

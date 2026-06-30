@@ -17,10 +17,12 @@ do not analyze imagined requirements.
 
 ## Checks (each finding cites file:line on BOTH sides of the mismatch)
 
-1. **Coverage** — every acceptance criterion / requirement in the spec maps to
-   at least one task, and every task maps back to something the spec asked
-   for. A requirement with zero tasks is a **CRITICAL** gap; a task with no
-   spec anchor is scope creep to flag. Report a coverage ratio.
+1. **Coverage (by ID)** — every spec `AC-#` is named in some task's `covers:`,
+   and every `covers:` points at a real `AC-#`. An `AC-#` claimed by no task is
+   a **CRITICAL** gap; a task covering nothing is scope creep to flag; a
+   `covers:` referencing a non-existent `AC-#` is drift. Report the ratio
+   (e.g. "14/14 AC covered"). If the spec predates IDs, match by wording and
+   recommend re-running `/agl-spec` to add them.
 2. **Unresolved ambiguity** — any `[NEEDS CLARIFICATION]` marker still in the
    spec, or success criteria with no measurable bar ("fast", "secure",
    "scalable" without a number). These mean the spec is not buildable yet

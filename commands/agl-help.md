@@ -15,8 +15,8 @@ if `$ARGUMENTS` asks something specific:
 
 | Lifecycle | |
 |---|---|
-| `/agl-spec <idea>` | Interview one question at a time → spec with measurable acceptance criteria; mark residual gaps `[NEEDS CLARIFICATION]` |
-| `/agl-plan` | Break the spec into small verifiable tasks, tag the risky ones, check the constitution |
+| `/agl-spec <idea>` | Interview one question at a time → spec with measurable `AC-#` criteria (P1/P2/P3 slices when sliceable); mark residual gaps `[NEEDS CLARIFICATION]` |
+| `/agl-plan` | Break the spec into small tasks (`covers:` AC IDs, `[P]` parallel-safe), tag the risky ones, check the constitution |
 | `/agl-analyze` | Read-only consistency check spec ↔ plan ↔ tasks ↔ constitution before building (coverage gaps, ambiguity, drift) |
 | `/agl-build` | TDD per task: red test → green code → suite → commit → stop |
 | `/agl-build auto` | Approve once → run the whole plan, auto-stop at risky tasks |

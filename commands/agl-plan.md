@@ -17,9 +17,17 @@ Read `${CLAUDE_PLUGIN_ROOT}/references/core-behaviors.md` (once per session).
 3. **Write the plan** to `plans/<YYMMDD-HHMM>-<slug>/plan.md`:
    - Tasks of ≤ ~1 hour each, every task with:
      `acceptance:` (how we'll know it's done — concrete, checkable),
-     `files:` (real paths), `depends:` (task IDs), and
+     `covers:` (the spec `AC-#` IDs this task satisfies — every `AC-#` must be
+     covered by at least one task; this is what /agl-analyze verifies),
+     `files:` (real paths), `depends:` (task IDs),
+     a `[P]` marker when the task shares no `files:` and no `depends:` with its
+     siblings (safe to run in parallel), and
      `risk:` tag where a risk gate applies (payment/auth/irreversible —
      these tasks require owner sign-off at build time, plan it in).
+   - If the spec defined P1/P2/P3 slices, order tasks so each slice is
+     independently completable: shared/foundational tasks first, then one
+     group per slice with a checkpoint line after each ("P1 done → shippable
+     MVP"). Stopping after any slice must leave something that works.
    - A `## Verification` section naming the evidence rung for the whole
      feature (suite + build at minimum; live UAT when UI/IPC is touched).
    - A `## Constitution Check` section if `.agl/CONSTITUTION.md` exists:

@@ -26,8 +26,15 @@ relevant memories (prior decisions, preferences) before asking anything.
 
 4. **Write the spec** to `docs/specs/<slug>.md`:
    - Problem & outcome (owner language: "user can X → we get Y")
-   - Acceptance criteria — each one independently checkable AND measurable
-     (a number or a yes/no test, never "fast" / "nice" / "secure")
+   - Acceptance criteria — each gets a stable ID (`AC-1`, `AC-2`, …),
+     independently checkable AND measurable (a number or a yes/no test, never
+     "fast" / "nice" / "secure"). The IDs are the traceability anchor:
+     /agl-plan tags each task with the `AC-#` it satisfies and /agl-analyze
+     checks every `AC-#` is covered.
+   - Priority slices (only when the feature is sliceable): group the criteria
+     into P1/P2/P3, each an independently shippable increment — P1 alone must
+     be a viable MVP, not half a feature. A non-sliceable feature stays one
+     slice; don't invent ceremony.
    - Out of scope — named, so /agl-build can refuse scope creep concretely
    - Risks & open questions — anything hitting a risk gate (payments, auth,
      irreversible ops) flagged here, not discovered mid-build

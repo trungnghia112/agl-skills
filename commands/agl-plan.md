@@ -24,10 +24,20 @@ Read `${CLAUDE_PLUGIN_ROOT}/references/core-behaviors.md` (once per session).
      siblings (safe to run in parallel), and
      `risk:` tag where a risk gate applies (payment/auth/irreversible —
      these tasks require owner sign-off at build time, plan it in).
-   - If the spec defined P1/P2/P3 slices, order tasks so each slice is
-     independently completable: shared/foundational tasks first, then one
-     group per slice with a checkpoint line after each ("P1 done → shippable
-     MVP"). Stopping after any slice must leave something that works.
+   - **Phase the tasks** — this is the spine of the plan:
+     - **Setup** — scaffolding/tooling the whole feature needs.
+     - **Foundational** — shared work every slice builds on. This phase
+       **blocks all slices**: no slice task starts until Foundational is green.
+       Keep it minimal — only what ≥2 slices genuinely share; don't smuggle a
+       single slice's own work in here.
+     - **One group per P-slice** (when the spec sliced them), each ending in a
+       **slice checkpoint**: a line naming the independently-verifiable
+       increment reached ("P1 done → CSV backup works = shippable MVP").
+       Stopping at any checkpoint must leave something that works on its own —
+       a slice may never `depends:` on a later slice.
+     - **Polish** — cross-cutting cleanup, done last.
+     A non-sliceable feature is just Setup → Foundational → one build group;
+     don't manufacture phases where there's one slice.
    - A `## Verification` section naming the evidence rung for the whole
      feature (suite + build at minimum; live UAT when UI/IPC is touched).
    - A `## Constitution Check` section if `.agl/CONSTITUTION.md` exists:

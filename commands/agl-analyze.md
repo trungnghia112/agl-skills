@@ -36,6 +36,10 @@ do not analyze imagined requirements.
    plan / tasks; both `/agl-recap` and `/agl-build` trip on this.
 6. **Plan realism** — tasks whose `files:` point at paths that don't exist and
    aren't created by an earlier task; `depends:` cycles or dangling task IDs.
+7. **Phase integrity** — a slice task that `depends:` on a later slice (breaks
+   independent delivery), or on nothing in Foundational when it clearly needs
+   shared setup; a slice whose checkpoint increment isn't actually shippable on
+   its own. Foundational that quietly contains one slice's private work.
 
 ## Discipline
 

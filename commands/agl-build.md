@@ -31,14 +31,22 @@ checkpoint. Check BRAIN.md for gotchas/runbook relevant to the files touched
    strangers' diffs or the clean-revert guarantee breaks.
 3. **Single checkpoint**: present the full plan, wait for an unambiguous yes
    ("approve"/"go"/"do it"). Hedged answers are not approval.
-4. Execute every task in dependency order through the per-task loop.
-5. **Hard stops mid-run** (report and wait — do not push through):
+4. Execute tasks in **phase then dependency order**: Setup → Foundational →
+   slices (P1, P2, …) → Polish, each through the per-task loop. Foundational
+   must be fully green before any slice task starts — the plan's phasing is
+   binding, not advisory.
+5. **At each slice checkpoint**, announce the shippable increment reached
+   ("✅ P1 done — CSV backup works, this is a shippable MVP") and continue.
+   This is a progress beat, not a stop — but if the owner said "stop at P1"
+   (or asked to ship the MVP early), treat the checkpoint as the end of the
+   run and report.
+6. **Hard stops mid-run** (report and wait — do not push through):
    - a `risk:`-tagged task is next (payments/auth/irreversible/secrets)
    - a test won't go green or the build breaks without an obvious fix
      (→ switch to /agl-debug methodology)
    - the spec is ambiguous on a decision the plan didn't settle
    On resume, `/agl-build auto` continues from the next pending task.
-6. End-of-run summary: tasks done, tests added, commits made, anything
+7. End-of-run summary: tasks done, tests added, commits made, anything
    skipped or flagged.
 
 ## Verification rung

@@ -11,6 +11,7 @@ truncated on read) and stale handover notes cause wrong-state reports.
 
 ```
 .agl/
+├── CONSTITUTION.md # project principles — binding gates. Read by spec/plan/review. Optional but recommended.
 ├── STATE.md        # small, always read at recap. The ONLY source of "now".
 ├── BRAIN.md        # memory index — one line per memory file. Read at recap.
 ├── memory/         # one durable fact per file. Read individually, on demand.
@@ -18,6 +19,50 @@ truncated on read) and stale handover notes cause wrong-state reports.
 └── sessions/       # append-only daily history. Rarely read; never read whole.
     └── YYYY-MM-DD.md
 ```
+
+## CONSTITUTION.md
+
+The project's binding principles — the few rules every spec, plan, and review
+must honor. Optional, but recommended once the project has a point of view (a
+stack choice, a testing bar, a "never do X"). Unlike `core-behaviors.md`
+(global AGL discipline, the same in every project), the constitution is THIS
+project's law, ratified by the owner.
+
+Hard size budget: **3–7 principles**. A constitution nobody can recite is
+decoration. Each principle is a gate: `/agl-plan` writes a `## Constitution
+Check` against it, `/agl-analyze` and `/agl-review` flag violations, and
+`/agl-build` honors it during implementation.
+
+```markdown
+---
+version: 1.0.0          # MAJOR.MINOR.PATCH — bump on every amendment
+ratified: YYYY-MM-DD
+amended: YYYY-MM-DD
+---
+
+# Constitution
+
+## P1 — <short name>
+<one or two lines: the rule as MUST / NEVER, and why it exists.>
+
+## P2 — <short name>
+...
+
+## Amendment log
+- 1.0.0 (YYYY-MM-DD) — ratified with P1–P4.
+```
+
+**Gate semantics.** A principle is overridden only with an explicit, recorded
+justification — what principle, why needed, what simpler alternative was
+rejected — written onto the plan's `## Constitution Check`. A silent violation
+is a review/analyze finding, not a judgment call.
+
+**Versioning.** MAJOR = a principle removed or redefined incompatibly;
+MINOR = a principle added; PATCH = wording/clarification. Bump on every edit
+and append to the amendment log. The constitution is the one brain file that
+is deliberately stable — it should change rarely and visibly. To change a rule
+mid-work, propose an amendment (with a version bump); don't quietly route
+around it.
 
 ## STATE.md
 

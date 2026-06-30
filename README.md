@@ -19,6 +19,9 @@ mandatory evidence, scope control). Everything is triggered by explicit
 
 Modeled on Claude Memory, not a single monolithic file:
 
+- **`.agl/CONSTITUTION.md`** — optional, 3–7 binding principles this project
+  lives by (stack, testing bar, "never do X"). Versioned and amended visibly;
+  `/agl-plan`, `/agl-analyze`, and `/agl-review` enforce it as gates.
 - **`.agl/STATE.md`** — small (≤150 lines), always read: what's in flight,
   backlog, watchlist. Frontmatter carries `last_commit` → recap runs
   `git log <anchor>..HEAD` to **detect staleness mechanically** instead of
@@ -45,7 +48,7 @@ overview. Every command is an explicit `/agl-*` — nothing auto-activates.
 
 ```
 morning:  /agl-recap
-working:  /agl-spec → /agl-plan → /agl-build auto → /agl-review
+working:  /agl-spec → /agl-plan → /agl-analyze → /agl-build auto → /agl-review
 done:     /agl-ship   (brain saves itself on ship; /agl-save when stopping mid-stream)
 ```
 
@@ -54,7 +57,7 @@ done:     /agl-ship   (brain saves itself on ship; /agl-save when stopping mid-s
 ```
 agl-skills/
 ├── .claude-plugin/plugin.json
-├── commands/        # 13 /agl-* commands (loaded only when invoked — near-zero background tokens)
+├── commands/        # 14 /agl-* commands (loaded only when invoked — near-zero background tokens)
 └── references/
     ├── core-behaviors.md   # core rules every command follows
     └── brain-format.md     # .agl/ spec + memory rules

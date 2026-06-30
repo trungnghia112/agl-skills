@@ -47,6 +47,17 @@ and **anything not undoable with `git revert`** (registry writes, file
 deletion outside the repo, external API mutations). When a stop happens
 inside an autonomous run, finish the current safe step, report, and wait.
 
+## Project constitution (if present)
+
+If `.agl/CONSTITUTION.md` exists, its principles are binding gates for this
+project — every spec, plan, build, and review honors them. A principle is
+overridden only with a recorded justification (what principle, why, which
+simpler alternative was rejected, written onto the plan's `## Constitution
+Check`); a silent violation is a defect, not a choice. Treat the constitution
+as law the owner ratified: propose an amendment with a version bump rather
+than quietly working around it. This is distinct from the global discipline
+above — that applies in every project; the constitution is this project's own.
+
 ## Communication (the owner experience)
 
 8. **Speak the user's language** (if the owner writes Vietnamese, answer in

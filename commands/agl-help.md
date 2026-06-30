@@ -15,8 +15,9 @@ if `$ARGUMENTS` asks something specific:
 
 | Lifecycle | |
 |---|---|
-| `/agl-spec <idea>` | Interview one question at a time → spec with acceptance criteria |
-| `/agl-plan` | Break the spec into small verifiable tasks, tag the risky ones |
+| `/agl-spec <idea>` | Interview one question at a time → spec with measurable acceptance criteria; mark residual gaps `[NEEDS CLARIFICATION]` |
+| `/agl-plan` | Break the spec into small verifiable tasks, tag the risky ones, check the constitution |
+| `/agl-analyze` | Read-only consistency check spec ↔ plan ↔ tasks ↔ constitution before building (coverage gaps, ambiguity, drift) |
 | `/agl-build` | TDD per task: red test → green code → suite → commit → stop |
 | `/agl-build auto` | Approve once → run the whole plan, auto-stop at risky tasks |
 | `/agl-test` | Plug test gaps + run the suite + live UAT when needed |
@@ -30,7 +31,7 @@ if `$ARGUMENTS` asks something specific:
 
 ```
 morning:  /agl-recap            → recall, pick work from the menu
-working:  /agl-spec → /agl-plan → /agl-build auto → /agl-review
+working:  /agl-spec → /agl-plan → /agl-analyze → /agl-build auto → /agl-review
 done:     /agl-ship             → brain saves itself during ship
 (/agl-save only needed when you stop mid-stream without shipping)
 ```
@@ -42,6 +43,8 @@ done:     /agl-ship             → brain saves itself during ship
 - "Looks right" is never enough — evidence required (test counts, build,
   live UAT); UI/IPC changes must be checked in the real app
 - Money / auth / data deletion / anything not undoable → stop for sign-off
+- Project law: `.agl/CONSTITUTION.md` principles are binding gates (plan and
+  review check them); override only with a recorded justification
 - Brain: one fact per file, update don't duplicate, delete when wrong,
   verify a recalled memory against current code before trusting it
 

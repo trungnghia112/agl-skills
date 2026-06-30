@@ -22,6 +22,11 @@ Read `${CLAUDE_PLUGIN_ROOT}/references/core-behaviors.md` (once per session).
      these tasks require owner sign-off at build time, plan it in).
    - A `## Verification` section naming the evidence rung for the whole
      feature (suite + build at minimum; live UAT when UI/IPC is touched).
+   - A `## Constitution Check` section if `.agl/CONSTITUTION.md` exists:
+     confirm the plan honors each principle. Any violation needs an explicit
+     justification line (which principle, why needed, what simpler alternative
+     was rejected) — an unjustified violation blocks the plan, it is not a
+     judgment call.
    - Status table (⬜/🟡/✅ per task) — /agl-build updates it as it goes.
 
 4. **Sanity pass**: would a staff engineer say "why didn't you just..."?

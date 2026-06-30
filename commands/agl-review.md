@@ -9,9 +9,11 @@ Scope: `$ARGUMENTS`, else the current diff (staged + recent branch commits).
 
 1. **Review across five axes**, reading the surrounding code, not just the
    diff: correctness (edge cases, races, error paths), readability,
-   architecture (does it fit the codebase's existing patterns?), security
-   (input validation, secrets, injection, least privilege), performance
-   (only what's measurable — no speculative micro-optimizing).
+   architecture (does it fit the codebase's existing patterns? — and, if
+   `.agl/CONSTITUTION.md` exists, does it honor each principle, or carry a
+   recorded justification for any violation?), security (input validation,
+   secrets, injection, least privilege), performance (only what's
+   measurable — no speculative micro-optimizing).
 
 2. **Adversarial verify before reporting.** For each candidate finding, try
    to REFUTE it: re-read the code assuming the author was right; check

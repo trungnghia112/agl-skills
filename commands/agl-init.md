@@ -20,11 +20,20 @@ Read `${CLAUDE_PLUGIN_ROOT}/references/core-behaviors.md` and
    (dev command, test command, UAT method) — this is what `/agl-test` and
    `/agl-build` will read later.
 
-4. **Gitignore decision.** Ask the owner (numbered menu): commit `.agl/` to
+4. **Seed a constitution (offer, don't impose).** From the survey, draft a
+   short `.agl/CONSTITUTION.md` (3–7 principles per brain-format.md) of rules
+   this project already lives by — e.g. the detected stack/test command as a
+   "tests MUST pass before merge" principle, an obvious "never commit secrets",
+   any convention visible in CLAUDE.md. Present the draft and ask the owner to
+   confirm, edit, or skip — these become binding gates for `/agl-plan` and
+   `/agl-review`, so they must be the owner's, not invented. If the project has
+   no clear point of view yet, skip the file and note it can be added later.
+
+5. **Gitignore decision.** Ask the owner (numbered menu): commit `.agl/` to
    the repo (team-shared brain, recommended for solo repos) or gitignore it
    (private brain).
 
-5. Report what was created, then end with the standard menu:
+6. Report what was created, then end with the standard menu:
 
 ```
 1️⃣ /agl-recap — review the state just created

@@ -52,6 +52,15 @@ working:  /agl-spec → /agl-plan → /agl-analyze → /agl-build auto → /agl-
 done:     /agl-ship   (brain saves itself on ship; /agl-save when stopping mid-stream)
 ```
 
+## Versioning
+
+`.claude-plugin/plugin.json` carries a semver `version` field — bump it
+(PATCH/MINOR/MAJOR per the usual rules) in the same commit as any
+user-facing change (new/changed command, behavior change). Without it,
+Claude Code falls back to labeling installs by git commit SHA, which is
+illegible to users and busts the plugin cache on every commit, including
+non-functional ones.
+
 ## Structure
 
 ```

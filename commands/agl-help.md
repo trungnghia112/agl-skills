@@ -18,6 +18,7 @@ if `$ARGUMENTS` asks something specific:
 | `/agl-spec <idea>` | Interview one question at a time → spec with measurable `AC-#` criteria (P1/P2/P3 slices when sliceable); mark residual gaps `[NEEDS CLARIFICATION]` |
 | `/agl-plan` | Break the spec into small phased tasks (Setup→Foundational→slices; `covers:` AC IDs, `[P]` parallel-safe), tag the risky ones, check the constitution |
 | `/agl-analyze` | Read-only consistency check spec ↔ plan ↔ tasks ↔ constitution before building (coverage gaps, ambiguity, drift) |
+| `/agl-converge` | Check the plan against the actual CODE (not just the other docs); appends gap-tasks, never rewrites |
 | `/agl-build` | TDD per task: red test → green code → suite → commit → stop |
 | `/agl-build auto` | Approve once → run the whole plan, auto-stop at risky tasks |
 | `/agl-test` | Plug test gaps + run the suite + live UAT when needed (diff the real payload against the plan's `## Contracts`) |

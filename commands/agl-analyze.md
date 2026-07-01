@@ -6,7 +6,9 @@ Read `${CLAUDE_PLUGIN_ROOT}/references/core-behaviors.md` (once per session).
 
 This command is **read-only**: it reports inconsistencies, it never edits the
 spec, plan, or code. Run it after `/agl-plan`, before `/agl-build` — catching a
-coverage gap here costs minutes; catching it mid-build costs a rewrite.
+coverage gap here costs minutes; catching it mid-build costs a rewrite. It
+checks artifacts against EACH OTHER, not against the actual code — for that,
+see `/agl-converge`.
 
 ## Inputs
 

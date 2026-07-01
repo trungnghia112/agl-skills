@@ -66,7 +66,7 @@ non-functional ones.
 ```
 agl-skills/
 ├── .claude-plugin/plugin.json
-├── commands/        # 14 /agl-* commands (loaded only when invoked — near-zero background tokens)
+├── commands/        # 15 /agl-* commands (loaded only when invoked — near-zero background tokens)
 └── references/
     ├── core-behaviors.md   # core rules every command follows
     └── brain-format.md     # .agl/ spec + memory rules

@@ -58,6 +58,13 @@ as law the owner ratified: propose an amendment with a version bump rather
 than quietly working around it. This is distinct from the global discipline
 above — that applies in every project; the constitution is this project's own.
 
+**Every amendment's log entry carries a `Sync:` note** — which in-flight
+plans (`plans/.../plan.md`) or open reviews need re-checking against the
+changed principle, or `Sync: no in-flight work affected`. An amendment
+without a sync note is the same kind of silent violation as an unjustified
+override: the amendment happened, but nothing downstream was told to notice.
+See `brain-format.md`'s CONSTITUTION.md section for the log format.
+
 ## Communication (the owner experience)
 
 8. **Speak the user's language** (if the owner writes Vietnamese, answer in

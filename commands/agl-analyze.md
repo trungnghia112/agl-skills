@@ -25,10 +25,23 @@ do not analyze imagined requirements.
    `covers:` referencing a non-existent `AC-#` is drift. Report the ratio
    (e.g. "14/14 AC covered"). If the spec predates IDs, match by wording and
    recommend re-running `/agl-spec` to add them.
-2. **Unresolved ambiguity** — any `[NEEDS CLARIFICATION]` marker still in the
-   spec, or success criteria with no measurable bar ("fast", "secure",
-   "scalable" without a number). These mean the spec is not buildable yet
-   (route back to `/agl-spec`).
+2. **Requirements quality** ("unit tests for the spec's English," not for the
+   code — this is about the writing, not the implementation) — any
+   `[NEEDS CLARIFICATION]` marker still in the spec is a **CRITICAL** gap on
+   its own. Beyond that, for each `AC-#`:
+   - **Clarity** — a vague qualifier with no number ("fast", "secure",
+     "scalable", "prominent") makes the AC unmeasurable, hence unbuildable.
+   - **Completeness** — an obviously-needed case left unstated (an error
+     path, an empty state, an auth boundary) for that AC.
+   - **Consistency** — two ACs (or an AC and a plan decision) describing the
+     same behavior differently.
+   - **Scenario coverage** — for the feature's core flow, are Primary /
+     Alternate / Exception / Recovery paths each represented, or silently
+     assumed? (Distinct from check 1's AC↔task coverage — this is coverage
+     *within* the spec's scenarios, not across artifacts.)
+   This is still an interview job, not a rewrite job: a real gap routes back
+   to `/agl-spec` — `/agl-analyze` reports the gap, it never invents the
+   missing requirement itself.
 3. **Constitution** — any plan or spec decision that violates a
    `.agl/CONSTITUTION.md` principle WITHOUT a recorded justification on the
    plan's `## Constitution Check` = **CRITICAL**.

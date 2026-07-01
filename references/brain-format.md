@@ -50,6 +50,8 @@ amended: YYYY-MM-DD
 
 ## Amendment log
 - 1.0.0 (YYYY-MM-DD) — ratified with P1–P4.
+- 1.1.0 (YYYY-MM-DD) — added P5 (<name>). Sync: re-check `## Constitution
+  Check` on plans/2026-06-*-foo/plan.md; /agl-review scope unaffected.
 ```
 
 **Gate semantics.** A principle is overridden only with an explicit, recorded
@@ -63,6 +65,13 @@ and append to the amendment log. The constitution is the one brain file that
 is deliberately stable — it should change rarely and visibly. To change a rule
 mid-work, propose an amendment (with a version bump); don't quietly route
 around it.
+
+**Sync Impact.** Every amendment log entry ends with a `Sync:` line naming
+which in-flight `plans/.../plan.md` (their `## Constitution Check` sections)
+or open reviews need re-checking against the changed principle — or states
+`Sync: no in-flight work affected`. This is what turns "the constitution
+changed" into "here's what to go re-verify," instead of a rule update nobody
+downstream hears about.
 
 ## STATE.md
 

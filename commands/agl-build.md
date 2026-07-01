@@ -11,9 +11,12 @@ checkpoint. Check BRAIN.md for gotchas/runbook relevant to the files touched
 
 1. Read the task's acceptance criteria + load real context (open the files).
 2. Non-trivial decisions → state ASSUMPTIONS first.
-3. **RED**: write the failing test that encodes the acceptance criterion.
-   (Where a test is genuinely impossible — e.g. UAC prompt UX — say so and
-   name the manual verification that replaces it. Silence is not an option.)
+3. **RED**: write the failing test that encodes the acceptance criterion. For
+   a task that touches a wire boundary, the test asserts against the plan's
+   `## Contracts` entry using the REAL payload (not the typed interface) — the
+   contract is the spec of correctness here. (Where a test is genuinely
+   impossible — e.g. UAC prompt UX — say so and name the manual verification
+   that replaces it. Silence is not an option.)
 4. **GREEN**: minimum code to pass. Boring solution preferred.
 5. Full suite + build. Regressions are YOUR problem now, not later.
 6. **Commit, surgically scoped**: stage only this task's files (+ its plan

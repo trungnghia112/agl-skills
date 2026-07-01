@@ -20,7 +20,7 @@ if `$ARGUMENTS` asks something specific:
 | `/agl-analyze` | Read-only consistency check spec ↔ plan ↔ tasks ↔ constitution before building (coverage gaps, ambiguity, drift) |
 | `/agl-build` | TDD per task: red test → green code → suite → commit → stop |
 | `/agl-build auto` | Approve once → run the whole plan, auto-stop at risky tasks |
-| `/agl-test` | Plug test gaps + run the suite + live UAT when needed |
+| `/agl-test` | Plug test gaps + run the suite + live UAT when needed (diff the real payload against the plan's `## Contracts`) |
 | `/agl-review` | Five-axis review, every finding challenged before it's reported |
 | `/agl-audit` | Security/deps/perf — every risk-accept needs a dated re-report trigger |
 | `/agl-debug` | Reproduce → isolate → fix → add a test that blocks regression |

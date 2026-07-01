@@ -38,8 +38,11 @@ relevant memories (prior decisions, preferences) before asking anything.
    - Out of scope — named, so /agl-build can refuse scope creep concretely
    - Risks & open questions — anything hitting a risk gate (payments, auth,
      irreversible ops) flagged here, not discovered mid-build
-   - Verification plan — which evidence rung closes this (tests only?
-     live UAT? wire-format probe?)
+   - Verification plan — which evidence rung closes this (tests only? live
+     UAT? wire-format probe?). If the feature crosses a wire boundary (HTTP,
+     IPC, webhook, file format, deep link), say so and mark "contract
+     required" — /agl-plan pins the exact payload shape so /agl-test has a
+     target to diff the real payload against.
    - Mark any genuine residual ambiguity inline with
      `[NEEDS CLARIFICATION: <the exact question>]` — but **no more than 3** in
      a spec. More than that means you stopped interviewing too early; ask

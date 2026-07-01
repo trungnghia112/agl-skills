@@ -40,6 +40,11 @@ do not analyze imagined requirements.
    independent delivery), or on nothing in Foundational when it clearly needs
    shared setup; a slice whose checkpoint increment isn't actually shippable on
    its own. Foundational that quietly contains one slice's private work.
+8. **Contract coverage** — every wire boundary the spec's verification plan
+   marks "contract required" has a matching entry in the plan's `## Contracts`;
+   every task touching that boundary references its contract; no contract field
+   contradicts the spec's acceptance criteria or data shape. A "contract
+   required" boundary with no contract = **HIGH** (wire-format bug surface).
 
 ## Discipline
 

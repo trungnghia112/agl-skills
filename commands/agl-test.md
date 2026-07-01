@@ -22,7 +22,11 @@ Read `${CLAUDE_PLUGIN_ROOT}/references/core-behaviors.md` (once per session).
    CSP/network, overlay/dialog behavior → live verification. Check BRAIN.md
    for a `runbook` memory (how this project runs/UATs — dev server, MCP
    bridge, emulators). Probe the real thing, capture evidence (output,
-   screenshot, raw payload).
+   screenshot, raw payload). **If the plan has a `## Contracts` section**,
+   diff the captured real payload against the contract field-by-field — a
+   passing type check is not this rung; a match against the contract is. A
+   drift (missing field, wrong type, renamed key, unexpected null) is a
+   failure to report, not a rounding error.
 
 5. **Gotchas to memory**: a surprising failure mode discovered while testing
    (flaky pattern, env trap, mock contract) → memory file per

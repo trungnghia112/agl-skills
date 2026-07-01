@@ -40,6 +40,14 @@ Read `${CLAUDE_PLUGIN_ROOT}/references/core-behaviors.md` (once per session).
      don't manufacture phases where there's one slice.
    - A `## Verification` section naming the evidence rung for the whole
      feature (suite + build at minimum; live UAT when UI/IPC is touched).
+   - A `## Contracts` section for every **wire boundary** the feature crosses
+     (HTTP endpoint, IPC channel, webhook, file format, deep link): the exact
+     shape — request/response fields with types, error shapes, status codes,
+     channel name + payload. Concrete enough to write a test against and to
+     diff a real payload against. This is the target `/agl-test` probes and
+     `/agl-analyze` checks; a boundary with no contract is exactly where
+     wire-format bugs (invisible to type checkers) hide. Features that cross no
+     wire boundary skip this section — don't invent contracts for pure logic.
    - A `## Constitution Check` section if `.agl/CONSTITUTION.md` exists:
      confirm the plan honors each principle. Any violation needs an explicit
      justification line (which principle, why needed, what simpler alternative

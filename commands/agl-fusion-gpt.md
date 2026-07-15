@@ -1,20 +1,20 @@
 ---
-description: Fusion panel of Opus 4.8 + GPT in parallel, judged + adversarially verified by Opus 4.8 (opus-gpt)
+description: Fusion panel of Opus + GPT in parallel, judged + adversarially verified by Opus (opus-gpt)
 argument-hint: <your hard question or task>
 ---
 
 Read `${CLAUDE_PLUGIN_ROOT}/references/core-behaviors.md` and
 `${CLAUDE_PLUGIN_ROOT}/references/fusion.md` (once per session).
 
-Run the **fusion** pipeline, forcing the `opus-gpt` panel: Opus 4.8
+Run the **fusion** pipeline, forcing the `opus-gpt` panel: Opus
 (`Agent` subagent) and GPT (via `run_codex.sh` → `codex exec`) answer the
 SAME prompt **in parallel**, each independently with web + bash and neither
-seeing the other's work → Opus 4.8 judges both, **adversarially verifies its own
+seeing the other's work → Opus judges both, **adversarially verifies its own
 synthesis**, and writes the final answer grounded in the analysis.
 
 Follow `references/fusion.md` exactly (one `run_dir` → preflight → fan out in
 parallel and blind → judge on the fitting track → adversarial verify → grounded
-final → `save_run.sh` → `save_brain.sh` → present). Use **exactly one** Opus 4.8
+final → `save_run.sh` → `save_brain.sh` → present). Use **exactly one** Opus
 panelist and **one** GPT panelist — do not add a Gemini panelist or a second
 Opus run. Pass the task **verbatim** to both; **no lenses**. Inject
 `.agl/CONSTITUTION.md` into each panelist prompt **only if it exists and the question

@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # detect_panel.sh — figure out which panelist CLIs are installed and recommend a Fusion panel.
 #
-# Fusion fans a prompt out to a panel of models in parallel, then Opus 4.8 judges. Opus 4.8 is always
-# available as a panelist via the Agent tool (in-process subagents) and is always the judge — so it never
-# needs a CLI check. This script only probes the *external* panelist CLIs (GPT via codex, Gemini 3.1
-# Pro via agy / Antigravity) and prints the richest panel the machine can currently support.
+# Fusion fans a prompt out to a panel of models in parallel, then the session model (nominally Opus)
+# judges. The Opus panelist + judge run via the Agent tool (in-process subagents, the session model) and
+# need no CLI check. This script only probes the *external* panelist CLIs (GPT via codex, Gemini via agy /
+# Antigravity) — each runs on its OWN configured default model — and prints the richest panel available.
 #
 # Output: human-readable lines + a final `SLUG=...` line the orchestrator can grep.
 
@@ -14,7 +14,7 @@ codex_ok=false; agy_ok=false
 have codex && codex_ok=true
 have agy   && agy_ok=true
 
-echo "panelist availability (Opus 4.8 is always a panelist + the judge, via Agent subagents):"
+echo "panelist availability (Opus is always a panelist + the judge, via Agent subagents):"
 echo "  opus   : yes (Agent subagents — always available)"
 printf "  gpt    : %s (codex CLI)\n" "$([ "$codex_ok" = true ] && echo yes || echo NO)"
 printf "  gemini : %s (agy CLI)\n"   "$([ "$agy_ok"   = true ] && echo yes || echo NO)"

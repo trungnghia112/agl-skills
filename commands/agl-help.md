@@ -30,10 +30,10 @@ if `$ARGUMENTS` asks something specific:
 
 | Fusion (multi-model panel) | |
 |---|---|
-| `/agl-fusion <q>` | Fan a hard question to a blind PANEL of models in parallel → Opus 4.8 judges + adversarially verifies → grounded answer. Auto-picks the richest panel installed |
-| `/agl-fusion-3 <q>` | Force the full 3-family panel: Opus 4.8 + GPT (`codex`) + Gemini (`agy`), degrades gracefully |
-| `/agl-fusion-gpt <q>` | Pinned Opus 4.8 + GPT panel (stops if `codex` missing) |
-| `/agl-fusion-gemini <q>` | Pinned Opus 4.8 + Gemini panel (falls back to two Opus runs if `agy` missing) |
+| `/agl-fusion <q>` | Fan a hard question to a blind PANEL of models in parallel → Opus judges + adversarially verifies → grounded answer. Auto-picks the richest panel installed |
+| `/agl-fusion-3 <q>` | Force the full 3-family panel: Opus + GPT (`codex`) + Gemini (`agy`), degrades gracefully |
+| `/agl-fusion-gpt <q>` | Pinned Opus + GPT panel (stops if `codex` missing) |
+| `/agl-fusion-gemini <q>` | Pinned Opus + Gemini panel (falls back to two Opus runs if `agy` missing) |
 | `/agl-fusion-opus <q>` | Pinned two-independent-Opus-4.8 panel — zero external CLI, works everywhere |
 | `/agl-fusion-plan <goal>` | Iterative 3-round panel that deepens an `/agl-plan` seed, then hands off to `/agl-analyze` → `/agl-build` |
 

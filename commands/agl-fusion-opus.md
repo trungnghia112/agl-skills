@@ -1,5 +1,5 @@
 ---
-description: Fusion panel of two independent Opus 4.8 runs, judged + adversarially verified by Opus 4.8 (opus-opus) — zero external CLI, works everywhere
+description: Fusion panel of two independent Opus runs, judged + adversarially verified by Opus (opus-opus) — zero external CLI, works everywhere
 argument-hint: <your hard question or task>
 ---
 
@@ -7,8 +7,8 @@ Read `${CLAUDE_PLUGIN_ROOT}/references/core-behaviors.md` and
 `${CLAUDE_PLUGIN_ROOT}/references/fusion.md` (once per session).
 
 Run the **fusion** pipeline, forcing the `opus-opus` panel: run the same prompt
-**twice** as TWO independent Opus 4.8 panelists (`Agent` subagents, in parallel,
-neither seeing the other's work) → Opus 4.8 judges both, **adversarially verifies
+**twice** as TWO independent Opus panelists (`Agent` subagents, in parallel,
+neither seeing the other's work) → Opus judges both, **adversarially verifies
 its own synthesis**, and writes the final answer grounded in the analysis. This
 panel needs **no external CLI** and works everywhere — two cold runs of the same
 model, synthesized, beat running it once.

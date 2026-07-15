@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# run_gemini.sh — run one Gemini 3.1 Pro panelist (via the `agy` / Antigravity CLI), web + bash.
+# run_gemini.sh — run one Gemini panelist (via the `agy` / Antigravity CLI), web + bash.
 #
 # Usage:
 #   run_gemini.sh <prompt_file> <output_file>
@@ -17,11 +17,12 @@
 #                       The orchestrator then drops Gemini and degrades the panel.
 #
 # Config (env):
-#   AGY_MODEL            pin an exact model (see `agy models`). Default (unset): auto-pick the
-#                        strongest Gemini "Pro (High)" tier agy currently offers — Pro quality
-#                        WITHOUT hard-pinning a version (a newer Pro is selected automatically when
-#                        agy ships it). This is why the default is Pro, not agy's own (Flash) default.
-#   FUSION_AGY_NO_MODEL  set to 1 to omit --model entirely (use agy's own default, e.g. a Flash tier).
+#   AGY_MODEL            OPTIONAL — pin an exact model (see `agy models`). Default (unset): pass NO
+#                        --model, so agy uses YOUR configured default model. Fusion does not pick,
+#                        prefer a tier, or hardcode any model — choose your tier in agy itself
+#                        (e.g. via `agy` config / whatever agy uses when you don't pass --model).
+#   FUSION_AGY_NO_MODEL  back-compat no-op now (the default already omits --model). Only meaningful
+#                        together with AGY_MODEL, where it forces --model to be dropped anyway.
 #   FUSION_TIMEOUT       per-panelist budget in seconds (default 600, from _fusion_lib.sh).
 
 set -uo pipefail
@@ -32,20 +33,9 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 prompt_file="${1:?usage: run_gemini.sh <prompt_file> <output_file>}"
 output_file="${2:?usage: run_gemini.sh <prompt_file> <output_file>}"
 
-# Capture an explicit pin (if any); the default is resolved below, after the have-agy check.
+# Optional explicit pin only; unset → no --model → agy's own configured default model (client config).
+# Fusion never picks or hardcodes a model here.
 AGY_MODEL="${AGY_MODEL:-}"
-
-# Pick the strongest "Pro (High)" model agy offers; fall back to any "Pro", then a known Pro
-# string. `sort -V` orders versions so a newer Pro (e.g. 3.5 Pro) auto-wins over 3.1 Pro. Bounded
-# via _run_with_timeout + fully fail-safe, so model detection never breaks or hangs a fusion run.
-_pick_agy_pro_model() {
-  local models pick
-  models="$(_run_with_timeout 15 agy models 2>/dev/null)" || models=""
-  pick="$(printf '%s\n' "$models" | grep -E 'Pro \(High\)' | sort -V | tail -1)"
-  [ -z "$pick" ] && pick="$(printf '%s\n' "$models" | grep -E 'Pro' | sort -V | tail -1)"
-  [ -z "$pick" ] && pick="Gemini 3.1 Pro (High)"
-  printf '%s' "$pick"
-}
 BRAIN_DIR="$HOME/.gemini/antigravity-cli/brain"
 # agy's own print-mode deadline (Go duration); keep the external backstop a bit longer
 # so agy stops itself cleanly first.
@@ -57,10 +47,10 @@ if ! have agy; then
   exit 127
 fi
 
-# Resolve the default model now that agy is present: no explicit pin and not opted out → strongest Pro tier.
-if [ -z "$AGY_MODEL" ] && [ -z "${FUSION_AGY_NO_MODEL:-}" ]; then
-  AGY_MODEL="$(_pick_agy_pro_model)"
-  echo "[run_gemini.sh] model: $AGY_MODEL (auto-picked Pro tier; pin via AGY_MODEL, opt out via FUSION_AGY_NO_MODEL)" >&2
+if [ -n "$AGY_MODEL" ]; then
+  echo "[run_gemini.sh] model pinned via AGY_MODEL: $AGY_MODEL" >&2
+else
+  echo "[run_gemini.sh] model: agy's configured default (no --model; set AGY_MODEL to pin one)" >&2
 fi
 
 scratch="$(mktemp -d "${TMPDIR:-/tmp}/fusion-gemini.XXXXXX")"

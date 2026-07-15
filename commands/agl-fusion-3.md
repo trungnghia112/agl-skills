@@ -1,5 +1,5 @@
 ---
-description: Full 3-family fusion panel — Opus 4.8 + GPT + Gemini in parallel, judged + adversarially verified by Opus 4.8 (opus-gpt-gemini)
+description: Full 3-family fusion panel — Opus + GPT + Gemini in parallel, judged + adversarially verified by Opus (opus-gpt-gemini)
 argument-hint: <your hard question or task>
 ---
 
@@ -7,10 +7,10 @@ Read `${CLAUDE_PLUGIN_ROOT}/references/core-behaviors.md` and
 `${CLAUDE_PLUGIN_ROOT}/references/fusion.md` (once per session).
 
 Run the **fusion** pipeline, forcing the richest panel
-`opus-gpt-gemini`: Opus 4.8 (`Agent` subagent), GPT (via
+`opus-gpt-gemini`: Opus (`Agent` subagent), GPT (via
 `run_codex.sh` → `codex exec`), and Gemini (via `run_gemini.sh` → `agy`,
 pseudo-TTY) answer the SAME prompt **in parallel**, each independently with
-web + bash and none seeing the others' work → Opus 4.8 judges all three,
+web + bash and none seeing the others' work → Opus judges all three,
 **adversarially verifies its own synthesis**, and writes the final answer
 grounded in the analysis.
 
@@ -25,7 +25,7 @@ add a second Opus run.
 This command targets the FULL panel but **degrades gracefully**: if `codex` or
 `agy` is missing or a panelist fails/times out, drop it, note the degraded panel
 in the output, and finish with what remains (`opus-gpt`, then ultimately
-`opus-opus`) rather than aborting. Opus 4.8 always judges and writes the final
+`opus-opus`) rather than aborting. Opus always judges and writes the final
 answer.
 
 For a research/analysis task present the five sections (Consensus /

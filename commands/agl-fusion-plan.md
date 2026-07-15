@@ -1,5 +1,5 @@
 ---
-description: High-confidence CONCISE plan — a 3-round iterative fusion panel (Opus 4.8 + GPT, blind) deepens an /agl-plan seed, then hands off to /agl-analyze → /agl-build. agl-native (no OMC).
+description: High-confidence CONCISE plan — a 3-round iterative fusion panel (Opus + GPT, blind) deepens an /agl-plan seed, then hands off to /agl-analyze → /agl-build. agl-native (no OMC).
 argument-hint: "[--no-interview] <what to plan / decide>"
 ---
 
@@ -15,7 +15,7 @@ interview, plan format, consistency gate, and execution.
 
 `${SCRIPTS}` is `${CLAUDE_PLUGIN_ROOT}/scripts/fusion`.
 
-**Hard rule (same as fusion): Opus 4.8 always judges and synthesizes. You are the
+**Hard rule (same as fusion): Opus always judges and synthesizes. You are the
 judge — stay separate from the panelists.** The Opus panelist is always a
 *spawned subagent*, never you.
 
@@ -54,8 +54,8 @@ runs never collide, then check codex:
 command -v codex && codex --version
 ```
 
-- `codex` installed → run the full Opus 4.8 + GPT loop below.
-- `codex` **missing** → tell the user, then fall back to two independent Opus 4.8
+- `codex` installed → run the full Opus + GPT loop below.
+- `codex` **missing** → tell the user, then fall back to two independent Opus
   panelists per round (`opus-opus`) rather than failing. Note the downgrade and
   how to enable GPT (`npm i -g @openai/codex` + `codex login`).
 
@@ -93,7 +93,7 @@ across a round is the previous round's synthesized plan (or `SEED_PLAN` in round
 
 ### 2b. Launch BOTH panelists in ONE turn (parallel, blind)
 
-- **Opus 4.8 panelist** → `Agent` tool, `subagent_type: general-purpose`,
+- **Opus panelist** → `Agent` tool, `subagent_type: general-purpose`,
   prompt = the panelist prompt above, **first line marked `[AGL-FUSION-PANELIST]`**.
   Spawn a **fresh** subagent each round.
 - **GPT panelist** → write the prompt to a file under `$run_dir` and run codex

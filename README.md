@@ -64,7 +64,7 @@ non-functional ones.
 ## Fusion — multi-model panels
 
 `/agl-fusion` fans a hard question to a **blind panel of models in parallel** —
-each answers independently with web + bash, none seeing the others — then Opus 4.8
+each answers independently with web + bash, none seeing the others — then Opus
 judges every answer into a structured analysis (consensus / contradictions /
 partial / unique / blind spots), **adversarially verifies its own synthesis**, and
 writes a grounded final answer. The mechanism is *independence, then synthesis* —
@@ -79,14 +79,15 @@ no lenses, every panelist gets the task verbatim.
 /agl-fusion-plan    3-round iterative panel deepening an /agl-plan seed
 ```
 
-Panelists are **version-agnostic** — no pinned `gpt5.5`/`gemini3.1pro`. Opus/judge
-use the session model, GPT uses your `codex` account default, and Gemini auto-picks
-the strongest `Pro (High)` tier `agy` currently lists — so fusion tracks model
-upgrades automatically. Override the Gemini pick with `AGY_MODEL="<exact model>"`,
-or `FUSION_AGY_NO_MODEL=1` to use agy's own (often Flash) default. Per-panelist
-timeout defaults to 600s (`FUSION_TIMEOUT`).
+Fusion **never pins or picks a model** — each panelist runs on whatever its CLI is
+configured to use: Opus/judge on the **session model**, GPT on your **`codex`
+account default**, Gemini on your **`agy` configured default** (choose the tier in
+agy itself). Slugs name the family (`opus-gpt-gemini`), never a version, so
+upgrading any CLI's default silently upgrades fusion. Optional per-run pin for
+Gemini only: `AGY_MODEL="<exact model>"`. Per-panelist timeout defaults to 600s
+(`FUSION_TIMEOUT`).
 
-Opus 4.8 **always** judges and writes the final answer. Every panel degrades
+Opus **always** judges and writes the final answer. Every panel degrades
 gracefully (a missing CLI drops that panelist, never aborts). Runs are saved to
 `~/.claude/fusion-runs/` and mirrored into the project's `.agl/fusion-runs/`;
 panelists honor `.agl/CONSTITUTION.md` on project-scoped questions. The runner scripts in

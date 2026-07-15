@@ -5,7 +5,7 @@ Read once per session, on the first `/agl-fusion*` invocation (alongside
 
 Fusion turns one prompt into a **panel**. The question goes to several models
 **at the same time**, each answering independently — with web search and bash,
-and with no knowledge of the others. Then Opus 4.8 (this session — the
+and with no knowledge of the others. Then Opus (this session — the
 orchestrator) reads every answer, extracts the structure of the panel's
 reasoning (what they agree on, where they conflict, what only one saw, what they
 all missed), **adversarially verifies its own synthesis**, and writes a final
@@ -18,7 +18,7 @@ sources — even two cold runs of the same model diverge enough that synthesizin
 them beats running it once. So there are **no assigned "lenses" or personas** —
 every panelist gets the user's task **verbatim** and answers it straight.
 
-**One hard rule: Opus 4.8 always judges and writes the final answer — the
+**One hard rule: Opus always judges and writes the final answer — the
 pipeline can't be reversed.** The panelist models can't call back out to spawn
 Opus, so Opus is always the driver. The slug reads driver-first for that reason.
 
@@ -77,26 +77,31 @@ It prints a `SLUG=` line:
 
 | Slug | Panel | Requires |
 | --- | --- | --- |
-| `opus-opus` | the same prompt run twice as 2 independent Opus 4.8 panelists | nothing — always available |
-| `opus-gpt` | Opus 4.8 + GPT in parallel | `codex` CLI |
-| `opus-gemini` | Opus 4.8 + Gemini in parallel | `agy` CLI |
-| `opus-gpt-gemini` | Opus 4.8 + GPT + Gemini in parallel | `codex` + `agy` CLIs |
+| `opus-opus` | the same prompt run twice as 2 independent Opus panelists | nothing — always available |
+| `opus-gpt` | Opus + GPT in parallel | `codex` CLI |
+| `opus-gemini` | Opus + Gemini in parallel | `agy` CLI |
+| `opus-gpt-gemini` | Opus + GPT + Gemini in parallel | `codex` + `agy` CLIs |
 
 If the user named a slug (or used a pinned `/agl-fusion-*` command), honor it —
 but if a required CLI is missing, say so, drop that panelist, and fall back to
 the next-richest panel rather than failing. Otherwise use the detector's pick.
 
-**Which model each panelist runs (version-agnostic).** Fusion never hard-codes a
-model version — it tracks upgrades automatically instead of pinning
-`gpt5.5`/`gemini3.1pro`: the Opus panelist(s) and the judge inherit the **session
-model**; the GPT panelist uses **codex's account default** (whatever your `codex`
-is on now — GPT-5.6, later 5.7, …); the Gemini panelist **auto-picks the strongest
-`Pro (High)` tier `agy models` currently lists** — Pro quality without pinning a
-number, so a newer Pro is selected automatically when agy ships it. The slugs name
-the *family* (`opus-gpt-gemini`), not a version, for the same reason. Overrides for
-the Gemini runner: `AGY_MODEL="<exact model>"` pins one; `FUSION_AGY_NO_MODEL=1`
-uses agy's own default (often a lighter Flash tier). `run_codex.sh` follows your
-codex account default.
+**Which model each panelist runs — the client's terminal config, never a hardcode.**
+Fusion **never pins, picks, or prefers a model or tier**. Each panelist runs on
+whatever its CLI is configured to use:
+- **Opus panelist(s) + the judge** → the **session model** (whatever Claude Code is
+  set to). "Opus" throughout these docs is a *nominal* label for the driver — the
+  actual model is your session's (Sonnet, Fable, a newer Opus, …).
+- **GPT panelist** → **codex's account default** (`run_codex.sh` passes no `--model`).
+- **Gemini panelist** → **agy's configured default** (`run_gemini.sh` passes no
+  `--model`). Choose the tier you want in agy itself (a Pro vs a Flash tier is your
+  `agy` setting, not fusion's).
+
+The slugs name the *family* (`opus-gpt-gemini`), never a version, for the same
+reason. Optional per-run override for Gemini only: `AGY_MODEL="<exact model from
+agy models>"` pins one for that run. That is the *only* model knob, and it is off
+by default — so upgrading any CLI's default silently upgrades fusion, with nothing
+to change here.
 
 ## Step 1 — Preflight (informational, never a gate)
 
@@ -140,7 +145,7 @@ does **not** assign a lens or nudge the conclusion.
 
 Launch **all panelists in a single turn** so they run concurrently:
 
-- **Opus 4.8 panelist(s)** → the `Agent` tool, `subagent_type: general-purpose`
+- **Opus panelist(s)** → the `Agent` tool, `subagent_type: general-purpose`
   (web + bash built in). For `opus-opus`, spawn **two** independent Opus
   subagents with the *same* prompt — two cold runs. For every other slug, spawn
   **exactly one** Opus panelist alongside the external panelist(s). Send them in

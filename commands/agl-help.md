@@ -28,6 +28,19 @@ if `$ARGUMENTS` asks something specific:
 | `/agl-ship` | Gate on evidence → changelog → push → auto-save the brain |
 | `/agl-next` | Suggest the next task from the backlog (check git before suggesting) |
 
+| Fusion (multi-model panel) | |
+|---|---|
+| `/agl-fusion <q>` | Fan a hard question to a blind PANEL of models in parallel → Opus 4.8 judges + adversarially verifies → grounded answer. Auto-picks the richest panel installed |
+| `/agl-fusion-3 <q>` | Force the full 3-family panel: Opus 4.8 + GPT (`codex`) + Gemini (`agy`), degrades gracefully |
+| `/agl-fusion-gpt <q>` | Pinned Opus 4.8 + GPT panel (stops if `codex` missing) |
+| `/agl-fusion-gemini <q>` | Pinned Opus 4.8 + Gemini panel (falls back to two Opus runs if `agy` missing) |
+| `/agl-fusion-opus <q>` | Pinned two-independent-Opus-4.8 panel — zero external CLI, works everywhere |
+| `/agl-fusion-plan <goal>` | Iterative 3-round panel that deepens an `/agl-plan` seed, then hands off to `/agl-analyze` → `/agl-build` |
+
+Fusion runs are mirrored into `.agl/fusion-runs/` (project brain) so they surface
+in `/agl-recap`; if `.agl/CONSTITUTION.md` exists, every panelist honors it. All
+panels degrade gracefully — a missing CLI drops that panelist, never aborts the run.
+
 ## Typical day
 
 ```

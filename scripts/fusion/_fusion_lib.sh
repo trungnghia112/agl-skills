@@ -12,7 +12,9 @@
 # 124 when the command was killed for running over time.
 
 # Default per-panelist budget in seconds; override with FUSION_TIMEOUT.
-FUSION_TIMEOUT="${FUSION_TIMEOUT:-300}"
+# 600s (not 300) because real panelist runs — codex at xhigh especially — routinely need >300s;
+# a 300s cap dropped GPT mid-run in testing. Raise further for heavy deep-research questions.
+FUSION_TIMEOUT="${FUSION_TIMEOUT:-600}"
 
 have() { command -v "$1" >/dev/null 2>&1; }
 

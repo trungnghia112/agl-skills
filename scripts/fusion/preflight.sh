@@ -28,7 +28,7 @@ echo "  panel        : $slug  ($n panelists + 1 Opus judge pass)"
 echo "  prompt size  : ~${words} words (~${in_tokens} input tokens) sent to EACH of $n panelists"
 echo "  note         : each panelist also generates a full answer, and the judge reads all $n;"
 echo "                 real token cost is several× the input. Heavy deep-research questions are slow."
-echo "  per-panelist timeout : ${FUSION_TIMEOUT:-300}s (override with FUSION_TIMEOUT)"
+echo "  per-panelist timeout : ${FUSION_TIMEOUT:-600}s (override with FUSION_TIMEOUT)"
 
 if command -v codex >/dev/null 2>&1; then
   echo "  codex (GPT) : installed — quota isn't readable non-interactively; if a run fails on"

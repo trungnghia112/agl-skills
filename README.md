@@ -79,11 +79,12 @@ no lenses, every panelist gets the task verbatim.
 /agl-fusion-plan    3-round iterative panel deepening an /agl-plan seed
 ```
 
-Panelists are **version-agnostic** — each uses its CLI's *current default* model
-(the session model for Opus/judge, `codex`'s default for GPT, `agy`'s default for
-Gemini), so fusion tracks model upgrades automatically instead of pinning
-`gpt5.5`/`gemini3.1pro`. Pin a specific/stronger tier with `AGY_MODEL=...` if your
-CLI default is a lighter model.
+Panelists are **version-agnostic** — no pinned `gpt5.5`/`gemini3.1pro`. Opus/judge
+use the session model, GPT uses your `codex` account default, and Gemini auto-picks
+the strongest `Pro (High)` tier `agy` currently lists — so fusion tracks model
+upgrades automatically. Override the Gemini pick with `AGY_MODEL="<exact model>"`,
+or `FUSION_AGY_NO_MODEL=1` to use agy's own (often Flash) default. Per-panelist
+timeout defaults to 600s (`FUSION_TIMEOUT`).
 
 Opus 4.8 **always** judges and writes the final answer. Every panel degrades
 gracefully (a missing CLI drops that panelist, never aborts). Runs are saved to

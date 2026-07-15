@@ -86,15 +86,16 @@ but if a required CLI is missing, say so, drop that panelist, and fall back to
 the next-richest panel rather than failing. Otherwise use the detector's pick.
 
 **Which model each panelist runs (version-agnostic).** Fusion never hard-codes a
-model version — it uses each CLI's *current default*, so it tracks upgrades
-automatically instead of pinning `gpt5.5`/`gemini3.1pro`: the Opus panelist(s) and
-the judge inherit the **session model**; the GPT panelist uses **codex's default**
-(whatever your `codex` account is on now — GPT-5.6, later 5.7, …); the Gemini
-panelist uses **agy's configured default**. The slugs name the *family*
-(`opus-gpt-gemini`), not a version, for the same reason. Caveat: a CLI's default
-may be a lighter tier (e.g. a Gemini Flash rather than Pro) — to pin a specific or
-stronger model, set `AGY_MODEL="Gemini 3.1 Pro (High)"` (or your current Pro tier)
-for the Gemini runner; `run_codex.sh` already follows your codex account default.
+model version — it tracks upgrades automatically instead of pinning
+`gpt5.5`/`gemini3.1pro`: the Opus panelist(s) and the judge inherit the **session
+model**; the GPT panelist uses **codex's account default** (whatever your `codex`
+is on now — GPT-5.6, later 5.7, …); the Gemini panelist **auto-picks the strongest
+`Pro (High)` tier `agy models` currently lists** — Pro quality without pinning a
+number, so a newer Pro is selected automatically when agy ships it. The slugs name
+the *family* (`opus-gpt-gemini`), not a version, for the same reason. Overrides for
+the Gemini runner: `AGY_MODEL="<exact model>"` pins one; `FUSION_AGY_NO_MODEL=1`
+uses agy's own default (often a lighter Flash tier). `run_codex.sh` follows your
+codex account default.
 
 ## Step 1 — Preflight (informational, never a gate)
 
@@ -103,8 +104,8 @@ bash ${SCRIPTS}/preflight.sh <SLUG> "$run_dir/question.txt"
 ```
 
 Show its output (rough token/call estimate + Codex cap reminder), then proceed.
-It never blocks. Each panelist is bounded by `FUSION_TIMEOUT` (default 300s);
-raise it for heavy deep-research questions (`FUSION_TIMEOUT=600 bash ${SCRIPTS}/...`).
+It never blocks. Each panelist is bounded by `FUSION_TIMEOUT` (default 600s);
+raise it for heavy deep-research questions (`FUSION_TIMEOUT=900 bash ${SCRIPTS}/...`).
 
 ## Step 2 — Fan out, in parallel and blind
 

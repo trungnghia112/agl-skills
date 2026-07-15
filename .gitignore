@@ -4,6 +4,10 @@ Thumbs.db
 *.swp
 *~
 
+# Python bytecode (from smoke-testing scripts/fusion/*.py)
+__pycache__/
+*.pyc
+
 # Local tooling
 node_modules/
 .idea/

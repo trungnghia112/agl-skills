@@ -16,8 +16,10 @@ truncated on read) and stale handover notes cause wrong-state reports.
 ├── BRAIN.md        # memory index — one line per memory file. Read at recap.
 ├── memory/         # one durable fact per file. Read individually, on demand.
 │   └── <type>-<slug>.md
-└── sessions/       # append-only daily history. Rarely read; never read whole.
-    └── YYYY-MM-DD.md
+├── sessions/       # append-only daily history. Rarely read; never read whole.
+│   └── YYYY-MM-DD.md
+└── fusion-runs/    # optional — /agl-fusion* provenance records (one .md per run). Written by
+    └── ...         # scripts/fusion/save_brain.sh; never read at recap. Absent until first fusion run.
 ```
 
 ## CONSTITUTION.md

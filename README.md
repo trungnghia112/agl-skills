@@ -61,13 +61,45 @@ Claude Code falls back to labeling installs by git commit SHA, which is
 illegible to users and busts the plugin cache on every commit, including
 non-functional ones.
 
+## Fusion — multi-model panels
+
+`/agl-fusion` fans a hard question to a **blind panel of models in parallel** —
+each answers independently with web + bash, none seeing the others — then Opus 4.8
+judges every answer into a structured analysis (consensus / contradictions /
+partial / unique / blind spots), **adversarially verifies its own synthesis**, and
+writes a grounded final answer. The mechanism is *independence, then synthesis* —
+no lenses, every panelist gets the task verbatim.
+
+```
+/agl-fusion         auto-pick the richest panel installed on this machine
+/agl-fusion-3       session model + GPT (codex) + Gemini (agy)
+/agl-fusion-gpt     session model + GPT (codex)
+/agl-fusion-gemini  session model + Gemini (agy)
+/agl-fusion-opus    two independent session-model runs — zero external CLI
+/agl-fusion-plan    3-round iterative panel deepening an /agl-plan seed
+```
+
+Panelists are **version-agnostic** — each uses its CLI's *current default* model
+(the session model for Opus/judge, `codex`'s default for GPT, `agy`'s default for
+Gemini), so fusion tracks model upgrades automatically instead of pinning
+`gpt5.5`/`gemini3.1pro`. Pin a specific/stronger tier with `AGY_MODEL=...` if your
+CLI default is a lighter model.
+
+Opus 4.8 **always** judges and writes the final answer. Every panel degrades
+gracefully (a missing CLI drops that panelist, never aborts). Runs are saved to
+`~/.claude/fusion-runs/` and mirrored into the project's `.agl/fusion-runs/`;
+panelists honor `.agl/CONSTITUTION.md` when present. The runner scripts in
+`scripts/fusion/` are self-contained (bash/perl/python3 + optional `codex`/`agy`).
+
 ## Structure
 
 ```
 agl-skills/
 ├── .claude-plugin/plugin.json
-├── commands/        # 15 /agl-* commands (loaded only when invoked — near-zero background tokens)
-└── references/
-    ├── core-behaviors.md   # core rules every command follows
-    └── brain-format.md     # .agl/ spec + memory rules
+├── commands/        # 21 /agl-* commands (loaded only when invoked — near-zero background tokens)
+├── references/
+│   ├── core-behaviors.md   # core rules every command follows
+│   ├── brain-format.md     # .agl/ spec + memory rules
+│   └── fusion.md           # panel → judge doctrine (Track A/B + the agl upgrades)
+└── scripts/fusion/  # self-contained panelist runners (codex, agy pseudo-TTY, perl timeout, provenance)
 ```

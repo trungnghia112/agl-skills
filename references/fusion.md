@@ -34,9 +34,10 @@ scripts are byte-identical to fusion-fable — that engineering is not re-derive
 1. **Brain provenance.** Every run is mirrored into the project's own `.agl/`
    brain (not only the global `~/.claude/fusion-runs/`), so a fusion answer
    travels with the project and surfaces in `/agl-recap`. (Step 6.)
-2. **Constitution-aware panelists.** If `.agl/CONSTITUTION.md` exists, every
-   panelist prompt carries the project's binding principles, so answers respect
-   project law instead of proposing things it forbids. (Step 2.)
+2. **Constitution-aware panelists.** For a **project-scoped** question, every
+   panelist prompt carries `.agl/CONSTITUTION.md`'s binding principles, so answers
+   respect project law instead of proposing things it forbids. Skipped for general
+   / off-project questions, where it would be noise. (Step 2.)
 3. **Adversarial judge.** After synthesis, the judge runs a *refute pass* on its
    own final answer — the same skepticism `/agl-review` and `/agl-analyze` apply
    to every finding — before presenting. This kills confidently-wrong synthesis,
@@ -115,8 +116,18 @@ self-contained answer; you are one of several independent experts and will not
 see the others' work.* Do **not** assign lenses; do **not** pre-digest the task.
 Answer in the user's question language.
 
-**Constitution injection (agl upgrade #2).** If `.agl/CONSTITUTION.md` exists,
-append its content to every panelist prompt under a header like:
+**Constitution injection (agl upgrade #2) — ONLY for project-scoped questions.**
+Inject `.agl/CONSTITUTION.md` **only when both** hold: (a) it exists, **and**
+(b) the question is about *this project* — its code, architecture, a decision or
+plan within it, "our X", a review/refactor of this repo. For a **general or
+off-project question** — a research / strategy / technical question not tied to
+this codebase (e.g. "is `ALTER TABLE … ADD COLUMN` safe on a big table",
+"what should a solo dev do in 2026") — **do NOT inject it**: the project's law is
+irrelevant noise there and only distracts the panelists. When genuinely unsure,
+lean toward **not** injecting (a missing-but-irrelevant constraint costs nothing;
+an injected-but-irrelevant one adds noise to every panelist and the judge).
+
+When it *does* apply, append its content to every panelist prompt under a header like:
 
 > This project is governed by the following binding principles — your answer
 > must respect them (or explicitly flag if the task requires violating one):

@@ -85,8 +85,9 @@ The original request **verbatim**, plus the current plan, plus:
 > improvement is possible, say so explicitly on the first line
 > (`NO_MATERIAL_CHANGE`) and return the plan unchanged.
 
-If `.agl/CONSTITUTION.md` exists, append it (per `references/fusion.md` step 2) so
-both planners respect project law. Keep panelists **isolated** — never paste one
+If `.agl/CONSTITUTION.md` exists, append it so both planners respect project law —
+planning is inherently project-scoped, so Step 2's injection **always** applies here
+(unlike a plain fusion question, which may be off-project). Keep panelists **isolated** — never paste one
 panelist's round-R output into the other's round-R prompt; the only shared input
 across a round is the previous round's synthesized plan (or `SEED_PLAN` in round 1).
 

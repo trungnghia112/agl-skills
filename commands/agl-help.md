@@ -38,7 +38,7 @@ if `$ARGUMENTS` asks something specific:
 | `/agl-fusion-plan <goal>` | Iterative 3-round panel that deepens an `/agl-plan` seed, then hands off to `/agl-analyze` → `/agl-build` |
 
 Fusion runs are mirrored into `.agl/fusion-runs/` (project brain) so they surface
-in `/agl-recap`; if `.agl/CONSTITUTION.md` exists, every panelist honors it. All
+in `/agl-recap`; on project-scoped questions panelists honor `.agl/CONSTITUTION.md`. All
 panels degrade gracefully — a missing CLI drops that panelist, never aborts the run.
 
 ## Typical day

@@ -14,7 +14,8 @@ installed, else it degrades gracefully). Follow `references/fusion.md` exactly:
    verbatim to `"$run_dir/question.txt"`; run `detect_panel.sh` for the SLUG.
 2. **Step 1** — preflight (informational, never a gate).
 3. **Step 2** — fan out **in parallel and blind**: each panelist gets the task
-   **verbatim** (no lenses), plus `.agl/CONSTITUTION.md` if it exists. Opus 4.8
+   **verbatim** (no lenses); add `.agl/CONSTITUTION.md` **only if it exists and the
+   question is about this project** (Step 2 — skip it for general/off-project questions). Opus 4.8
    panelist(s) via the `Agent` tool (first line marked `[AGL-FUSION-PANELIST]`);
    GPT via `run_codex.sh`; Gemini via `run_gemini.sh`. Launch all in one turn.
 4. **Step 3** — classify the deliverable, then judge: **Track A** (code → run both

@@ -89,7 +89,7 @@ timeout defaults to 600s (`FUSION_TIMEOUT`).
 Opus 4.8 **always** judges and writes the final answer. Every panel degrades
 gracefully (a missing CLI drops that panelist, never aborts). Runs are saved to
 `~/.claude/fusion-runs/` and mirrored into the project's `.agl/fusion-runs/`;
-panelists honor `.agl/CONSTITUTION.md` when present. The runner scripts in
+panelists honor `.agl/CONSTITUTION.md` on project-scoped questions. The runner scripts in
 `scripts/fusion/` are self-contained (bash/perl/python3 + optional `codex`/`agy`).
 
 ## Structure

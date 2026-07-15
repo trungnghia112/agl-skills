@@ -17,7 +17,8 @@ parallel and blind → judge on the fitting track → adversarial verify → gro
 final → `save_run.sh` → `save_brain.sh` → present). Use **exactly one** Opus 4.8
 panelist and **one** GPT panelist — do not add a Gemini panelist or a second
 Opus run. Pass the task **verbatim** to both; **no lenses**. Inject
-`.agl/CONSTITUTION.md` into each panelist prompt if it exists.
+`.agl/CONSTITUTION.md` into each panelist prompt **only if it exists and the question
+is about this project** (Step 2 — skip it for general/off-project questions).
 
 If the `codex` CLI is not installed, **stop and say so** (with how to enable it:
 `npm i -g @openai/codex` + `codex login`) rather than silently downgrading to the

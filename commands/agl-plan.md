@@ -14,6 +14,14 @@ Read `${CLAUDE_PLUGIN_ROOT}/references/core-behaviors.md` (once per session).
    source of plan drift), relevant BRAIN.md memories (gotchas! runbook),
    and the repo's conventions.
 
+   **Currency check — only if the plan commits to external tech.** Any library,
+   framework/tool version, API, or standard the plan picks: verify the
+   **current/recommended** one via live docs (context7 / official site), never
+   from training memory — which silently bakes a stale or deprecated pick into the
+   plan. If a newer option changes the approach, plan around it and note it beside
+   the choice. Pure internal work (no new external dependency) skips this — it is
+   not time-sensitive.
+
 3. **Write the plan** to `plans/<YYMMDD-HHMM>-<slug>/plan.md`:
    - Tasks of ≤ ~1 hour each, every task with:
      `acceptance:` (how we'll know it's done — concrete, checkable),

@@ -41,6 +41,11 @@ Controls without a threat model are guesses. Before the checks below:
 2. **Dependencies**: `npm audit` / `cargo audit` equivalents; verify
    "dev-only" risk-accepts with the dependency tree of the RELEASE build —
    a later non-optional dep can pull the same crate into production.
+   **Freshness (security facts are time-varying):** take CVE / advisory /
+   fixed-version facts from the **live** audit tool + the official advisory DB
+   *as of today* — never from training memory, whose cutoff hides any vuln
+   disclosed since. Record the audit date; it's the reference point step 7's
+   `Re-report trigger:` is measured against.
 3. **Performance**: measure first (bundle size, slow paths with real
    timings); flag only what has numbers behind it.
 4. **Money/state paths** (if present): atomicity of balance mutations,

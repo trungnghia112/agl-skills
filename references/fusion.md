@@ -28,7 +28,7 @@ Throughout, `${SCRIPTS}` is `${CLAUDE_PLUGIN_ROOT}/scripts/fusion`.
 
 ## What makes the agl version better than upstream fusion-fable
 
-Five deliberate upgrades sit on top of the proven panel→judge core (the runner
+Six deliberate upgrades sit on top of the proven panel→judge core (the runner
 scripts are byte-identical to fusion-fable — that engineering is not re-derived):
 
 1. **Brain provenance.** Every run is mirrored into the project's own `.agl/`
@@ -48,6 +48,12 @@ scripts are byte-identical to fusion-fable — that engineering is not re-derive
 5. **Multi-session concurrency safety.** *Every* temp file lives under one
    per-invocation `run_dir` (`mktemp -d`), so N Claude Code sessions can run
    fusion at once without ever reading each other's prompts or answers. (Step 0.)
+6. **Freshness guard.** For a **time-sensitive** question, every panelist prompt
+   carries a short guard: answer as of today from a **primary source** (not
+   training memory), find the *latest* version/edition/status, and keep "actually
+   released" distinct from "only announced." Skipped for timeless questions, where
+   it's noise. Generic and industry-neutral — locality is asked for only when the
+   answer actually depends on it. (Step 2.)
 
 Everything else — the mechanism, the tracks, graceful degradation — matches
 fusion-fable exactly.
@@ -66,6 +72,13 @@ run_dir="$(mktemp -d "${TMPDIR:-/tmp}/agl-fusion.XXXXXX")"
 Write the user's question **verbatim** to `"$run_dir/question.txt"` (several
 steps reuse it). Never use fixed paths like `/tmp/fusion_question.txt` — a fixed
 name lets a second session's run clobber or read this one's.
+
+Also resolve **today's date once** here — the freshness guard (Step 2) fills
+`[TODAY]` with it, so it must come from the clock, never from memory:
+
+```bash
+today="$(date +%F)"   # e.g. 2026-07-17
+```
 
 Then detect the richest panel this machine supports:
 
@@ -142,6 +155,38 @@ When it *does* apply, append its content to every panelist prompt under a header
 
 This is the *only* framing added — it constrains the answer to project law; it
 does **not** assign a lens or nudge the conclusion.
+
+**Freshness guard injection (agl upgrade #6) — ONLY for time-sensitive questions.**
+Inject a short freshness guard **only when** the answer hinges on a fact that can
+change over time — the latest version/edition/model, a price, a release /
+availability / validity status, current figures, a live standard or law. For a
+**timeless** question (how a hash map works, explain this algorithm, review this
+code, a math proof) it is pure noise — **skip it**. Unlike the constitution, an
+injected-but-unneeded guard costs little, so when a question asks for anything
+"latest / current / newest / now / this year," lean toward injecting.
+
+When it applies, append this guard to every panelist prompt, filling `[TODAY]`
+with `$today` (Step 0) and **rendering it in the question's language**. It is
+generic — no industry assumptions; locality is requested only if the answer needs it:
+
+> **[FRESHNESS — applies to every panelist]** Today is **[TODAY]**.
+> 1. Answer as of **[TODAY]**. For ANY time-sensitive fact (latest
+>    version/edition/model, price, figures, release/availability/validity status,
+>    a law or standard), do **not** rely on training memory — open a **primary
+>    source** (the issuer's own page) + ≥1 corroborating source, and record the
+>    lookup date.
+> 2. Actively find the **latest**. Keep **"actually released — usable/buyable/
+>    reachable now"** distinct from **"only announced / expected."** List the
+>    newest **beside** the older — never default to the old one.
+> 3. If a fact can't be verified, say **"could not verify as of [TODAY]"** — do
+>    not guess or backfill from memory.
+> 4. Locality only if it matters: if the answer depends on the asker's
+>    market/region and that's unclear, state the assumption used or ask one
+>    question; otherwise ignore locality.
+
+Like the constitution, this is the *only* framing added — it forces sourcing over
+recall; it does **not** assign a lens or nudge the conclusion. Both injections can
+apply at once: a question that is project-scoped **and** time-sensitive gets both.
 
 Launch **all panelists in a single turn** so they run concurrently:
 

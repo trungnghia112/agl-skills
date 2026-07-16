@@ -18,7 +18,9 @@ final → `save_run.sh` → `save_brain.sh` → present). Use **exactly one** Op
 panelist and **one** GPT panelist — do not add a Gemini panelist or a second
 Opus run. Pass the task **verbatim** to both; **no lenses**. Inject
 `.agl/CONSTITUTION.md` into each panelist prompt **only if it exists and the question
-is about this project** (Step 2 — skip it for general/off-project questions).
+is about this project** (Step 2 — skip it for general/off-project questions). Likewise
+inject the **freshness guard** (Step 2) **only if the question is time-sensitive**
+(latest version/price/release-status/law) — skip it for timeless questions.
 
 If the `codex` CLI is not installed, **stop and say so** (with how to enable it:
 `npm i -g @openai/codex` + `codex login`) rather than silently downgrading to the

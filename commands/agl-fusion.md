@@ -15,9 +15,11 @@ installed, else it degrades gracefully). Follow `references/fusion.md` exactly:
 2. **Step 1** — preflight (informational, never a gate).
 3. **Step 2** — fan out **in parallel and blind**: each panelist gets the task
    **verbatim** (no lenses); add `.agl/CONSTITUTION.md` **only if it exists and the
-   question is about this project** (Step 2 — skip it for general/off-project questions). Opus
-   panelist(s) via the `Agent` tool (first line marked `[AGL-FUSION-PANELIST]`);
-   GPT via `run_codex.sh`; Gemini via `run_gemini.sh`. Launch all in one turn.
+   question is about this project**, and add the **freshness guard** **only if the
+   question is time-sensitive** (latest version/price/status/law) — both are Step 2,
+   skipped otherwise. Opus panelist(s) via the `Agent` tool (first line marked
+   `[AGL-FUSION-PANELIST]`); GPT via `run_codex.sh`; Gemini via `run_gemini.sh`.
+   Launch all in one turn.
 4. **Step 3** — classify the deliverable, then judge: **Track A** (code → run both
    candidates, merge, run the merged result until it passes) or **Track B**
    (research → the five sections). Then **3c: adversarially verify your own

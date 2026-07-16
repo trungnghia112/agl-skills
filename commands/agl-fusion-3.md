@@ -19,8 +19,9 @@ preflight → fan out in parallel and blind → judge on the fitting track →
 adversarial verify → grounded final → `save_run.sh` → `save_brain.sh` → present).
 Pass the task **verbatim** to all three; **no lenses**. Inject `.agl/CONSTITUTION.md`
 into each panelist prompt **only if it exists and the question is about this project**
-(Step 2 — skip it for general/off-project questions). Three families, one of each — do **not**
-add a second Opus run.
+(Step 2 — skip it for general/off-project questions); likewise inject the **freshness guard**
+(Step 2) **only if the question is time-sensitive** (latest version/price/release-status/law).
+Three families, one of each — do **not** add a second Opus run.
 
 This command targets the FULL panel but **degrades gracefully**: if `codex` or
 `agy` is missing or a panelist fails/times out, drop it, note the degraded panel

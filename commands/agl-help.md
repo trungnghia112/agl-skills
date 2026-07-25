@@ -34,7 +34,7 @@ if `$ARGUMENTS` asks something specific:
 | `/agl-fusion-3 <q>` | Force the full 3-family panel: Opus + GPT (`codex`) + Gemini (`agy`), degrades gracefully |
 | `/agl-fusion-gpt <q>` | Pinned Opus + GPT panel (stops if `codex` missing) |
 | `/agl-fusion-gemini <q>` | Pinned Opus + Gemini panel (falls back to two Opus runs if `agy` missing) |
-| `/agl-fusion-opus <q>` | Pinned two-independent-Opus-4.8 panel — zero external CLI, works everywhere |
+| `/agl-fusion-opus <q>` | Pinned two-independent-Opus panel — zero external CLI, works everywhere |
 | `/agl-fusion-plan <goal>` | Iterative 3-round panel that deepens an `/agl-plan` seed, then hands off to `/agl-analyze` → `/agl-build` |
 
 Fusion runs are mirrored into `.agl/fusion-runs/` (project brain) so they surface

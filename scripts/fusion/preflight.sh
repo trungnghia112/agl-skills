@@ -9,6 +9,9 @@
 
 set -uo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+. "$SCRIPT_DIR/_fusion_lib.sh"
+
 slug="${1:?usage: preflight.sh <slug> <prompt_file>}"
 prompt_file="${2:?usage: preflight.sh <slug> <prompt_file>}"
 
@@ -36,5 +39,40 @@ if command -v codex >/dev/null 2>&1; then
 else
   echo "  codex (GPT) : NOT installed — GPT panelist will be skipped."
 fi
+
+# The GPT panelist runs against a throwaway copy of your working tree. Show what would be
+# copied and roughly what it costs, so an oversized source root is visible here rather than
+# showing up later as a slow run. Informational only — never a gate.
+case "$slug" in
+  *gpt*)
+    if [ "${FUSION_NO_COPY:-0}" = "1" ]; then
+      echo "  gpt sandbox : FUSION_NO_COPY=1 — codex runs against the LIVE cwd and can write to it"
+    elif _fusion_resolve_source_root; then
+      root="$FUSION_SOURCE_ROOT_RESOLVED"
+      echo "  gpt sandbox : copies $root  (source: $FUSION_SOURCE_MODE)"
+      if git -C "$root" rev-parse --show-toplevel >/dev/null 2>&1; then
+        echo "                git repo — copies tracked + untracked-not-ignored files only,"
+        echo "                so .gitignore'd build artifacts cost nothing. Copy cap ${FUSION_COPY_TIMEOUT}s."
+      else
+        probe="$(_fusion_probe_file_count "$root" "$FUSION_MAX_FILES" 5)"
+        probe_status=$?
+        if [ $probe_status -eq 124 ]; then
+          echo "                NOT a git repo, and too large to even count in 5s."
+          echo "                run_codex.sh will REFUSE to copy it — cd into your project first,"
+          echo "                or set FUSION_SOURCE_ROOT=<path>, or use FUSION_NO_COPY=1."
+        elif [ -n "$probe" ] && [ "$probe" -ge "$FUSION_MAX_FILES" ] 2>/dev/null; then
+          echo "                NOT a git repo, >= ${FUSION_MAX_FILES} files (excluding build dirs)."
+          echo "                run_codex.sh will REFUSE to copy it — cd into your project first,"
+          echo "                or set FUSION_SOURCE_ROOT=<path>, or use FUSION_NO_COPY=1."
+        else
+          echo "                NOT a git repo — plain copy of ~${probe:-?} files (build dirs excluded),"
+          echo "                capped at ${FUSION_COPY_TIMEOUT}s; over that, GPT is dropped, not hung."
+        fi
+      fi
+    else
+      echo "  gpt sandbox : FUSION_SOURCE_ROOT is unusable — GPT panelist will fail fast (exit 2)"
+    fi
+    ;;
+esac
 
 exit 0

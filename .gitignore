@@ -17,5 +17,8 @@ node_modules/
 # Local reference clones (third-party repos, never committed)
 .ref/
 
+# Serena symbol index / project memories (local tooling state)
+.serena/
+
 # Private AGL brain (not shared with the repo)
 .agl/

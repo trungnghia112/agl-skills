@@ -122,9 +122,14 @@ to change here.
 bash ${SCRIPTS}/preflight.sh <SLUG> "$run_dir/question.txt"
 ```
 
-Show its output (rough token/call estimate + Codex cap reminder), then proceed.
-It never blocks. Each panelist is bounded by `FUSION_TIMEOUT` (default 600s);
-raise it for heavy deep-research questions (`FUSION_TIMEOUT=900 bash ${SCRIPTS}/...`).
+Show its output (rough token/call estimate + Codex cap reminder + the source root the GPT
+panelist would sandbox), then proceed. It never blocks. Each panelist is bounded by
+`FUSION_TIMEOUT` (default 600s); raise it for heavy deep-research questions
+(`FUSION_TIMEOUT=900 bash ${SCRIPTS}/...`).
+
+If preflight reports that the GPT sandbox source root is a large **non-git** directory, act on
+it before fanning out — `cd` into the actual project, or pass `FUSION_SOURCE_ROOT=<path>`.
+`run_codex.sh` refuses such a root (exit 2) rather than copying it.
 
 ## Step 2 — Fan out, in parallel and blind
 
@@ -207,7 +212,18 @@ Launch **all panelists in a single turn** so they run concurrently:
   The runner copies the current repo/workdir to a throwaway directory, then runs
   `codex exec` with full local access against that copy — the live checkout is
   untouched while GPT gets the same local tools/keychain as a trusted Codex
-  run. Exit 124 = timed out; any other non-zero = drop GPT, note downgrade.
+  run. In a git repo the copy carries tracked + untracked-not-ignored files (so
+  uncommitted edits come along, and `.gitignore`'d build artifacts cost nothing)
+  plus `.git` for history; elsewhere it is a plain copy with heavy dirs excluded.
+  **Both the copy and the codex run are bounded**, so this step always returns:
+  exit 124 = timed out (`FUSION_COPY_TIMEOUT` 60s for the copy, `FUSION_TIMEOUT`
+  600s for codex); exit 2 = the source root is unusable or too large to sandbox;
+  any other non-zero = drop GPT, note downgrade.
+
+  Escape hatches, when the sandbox is the problem rather than the model:
+  `FUSION_SOURCE_ROOT=<path>` copies from an explicit root, and `FUSION_NO_COPY=1`
+  skips the copy entirely and runs codex against the live cwd — which it *can*
+  write to, so use it deliberately.
 - **Gemini panelist** (if slug includes it) →
   ```bash
   bash ${SCRIPTS}/run_gemini.sh "$run_dir/gemini_prompt.md" "$run_dir/gemini_out.md"

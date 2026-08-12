@@ -85,7 +85,9 @@ account default**, Gemini on your **`agy` configured default** (choose the tier 
 agy itself). Slugs name the family (`opus-gpt-gemini`), never a version, so
 upgrading any CLI's default silently upgrades fusion. Optional per-run pin for
 Gemini only: `AGY_MODEL="<exact model>"`. Per-panelist timeout defaults to 600s
-(`FUSION_TIMEOUT`).
+(`FUSION_TIMEOUT`); the throwaway workdir copy the GPT panelist runs against has
+its own 60s cap (`FUSION_COPY_TIMEOUT`), and can be redirected with
+`FUSION_SOURCE_ROOT=<path>` or skipped with `FUSION_NO_COPY=1`.
 
 Opus **always** judges and writes the final answer. Every panel degrades
 gracefully (a missing CLI drops that panelist, never aborts). Runs are saved to

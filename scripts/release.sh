@@ -17,6 +17,15 @@ set -euo pipefail
 cd "$(git rev-parse --show-toplevel)"
 dry="${DRY_RUN:-}"
 
+# A release is the moment the version number reaches users, so validate before
+# tagging — not after. Runs on DRY_RUN too, so a preview tells you the truth.
+if ! bash scripts/validate.sh; then
+  echo
+  echo "ERROR: validation failed — nothing tagged or pushed."
+  exit 1
+fi
+echo
+
 ver="$(python3 -c 'import json;print(json.load(open(".claude-plugin/plugin.json"))["version"])')"
 [ -n "$ver" ] || { echo "ERROR: no version in .claude-plugin/plugin.json"; exit 1; }
 tag="v$ver"

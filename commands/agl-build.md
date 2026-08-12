@@ -23,6 +23,10 @@ checkpoint. Check BRAIN.md for gotchas/runbook relevant to the files touched
    status update). Never `git add -A`. One task = one commit = one clean
    revert point.
 7. Mark the task ✅ in plan.md, update `.agl/STATE.md` `## Now` (2 lines).
+   ✅ requires BOTH the task's own `acceptance:` AND the Correctness + Quality
+   sections of `${CLAUDE_PLUGIN_ROOT}/references/definition-of-done.md` —
+   acceptance criteria answer "did we build the right thing?", the standing
+   bar answers "is it finished?". Neither one alone earns the checkmark.
 8. Default mode: stop and report. Auto mode: next task.
 
 ## Auto mode (`/agl-build auto`)

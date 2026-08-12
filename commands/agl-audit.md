@@ -38,9 +38,37 @@ Controls without a threat model are guesses. Before the checks below:
    path traversal — beware: naive canonicalize() fixes break symlinked
    legitimate paths, prefer lexical normalization); authz on every mutating
    endpoint; least privilege.
-2. **Dependencies**: `npm audit` / `cargo audit` equivalents; verify
-   "dev-only" risk-accepts with the dependency tree of the RELEASE build —
-   a later non-optional dep can pull the same crate into production.
+2. **Dependencies**: run the project's **own** package manager's audit
+   (`npm`/`pnpm`/`yarn`/`cargo`/`pip` — detect it from the committed
+   lockfile, don't assume npm; competing lockfiles at one install boundary
+   is itself a finding). Then:
+   - **Triage by reachability, not by the severity column.** Critical/high
+     reachable in runtime, build, test, or deploy paths → fix now; confirmed
+     unreachable → fix soon, not a blocker; moderate dev-only → backlog. Ask
+     whether the vulnerable *function* is actually on a code path, and
+     whether the vuln is even exploitable in this deployment shape (a
+     server-side vuln in a client-only app is not). Verify "dev-only"
+     risk-accepts against the dependency tree of the RELEASE build — a later
+     non-optional dep can pull the same package into production.
+   - **An audit is not a trust verdict.** It matches known advisories; it
+     cannot see a newly malicious or typosquatted package (`crossenv` vs
+     `cross-env`). Review new deps and lockfile diffs together: ownership,
+     release age, provenance, transitive graph. Check registry signatures
+     where supported (`npm audit signatures`); absence is a reason to look
+     closer, not proof of compromise.
+   - **Never auto-apply forced remediation** (`npm audit fix --force` or
+     equivalent) — it crosses declared version ranges. Preview it, read the
+     changelogs, test each resulting upgrade.
+   - **Install scripts are code execution.** Bootstrap with dependency
+     scripts disabled, inspect what wants to run, approve the minimum, commit
+     the policy, verify with a clean frozen/immutable install. Blanket
+     approval is a finding.
+   - **Upgrades are code changes.** One dependency per change (a bulk "bump
+     deps" hides which package broke the build and ruins the revert), read
+     the changelog rather than trusting the semver label, and let a green
+     suite before *and* after decide — "it installed" is not verification.
+     Commit the lockfile, review its diff, never hand-edit it.
+
    **Freshness (security facts are time-varying):** take CVE / advisory /
    fixed-version facts from the **live** audit tool + the official advisory DB
    *as of today* — never from training memory, whose cutoff hides any vuln

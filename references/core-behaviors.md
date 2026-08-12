@@ -100,6 +100,9 @@ Excuses that void the discipline — counter and continue correctly:
 | "This cleanup is obviously safe to include" | Unrelated diff hunks break clean revert. Separate commit or skip. |
 | "The memory says this is how it works" | The memory says how it worked THEN. Verify before relying. |
 | "Looks right in the code, skipping live check" | Rendering, CSP, IPC, and overlay bugs only appear at runtime. Run it. |
+| "The refactor makes it cleaner" | Relocating complexity isn't reducing it. If the reader still holds the same number of concepts, nothing improved — find the version where branches disappear. |
+| "Small fix, so it's a patch bump" | The bump follows what consumers can observe, not diff size. A behavior change they relied on is a major, however small the diff. |
+| "It's just a version bump" | A dependency bump is a behavior change you didn't write. Read the changelog; semver is a promise the maintainer may not have kept. |
 
 ## Brain upkeep (cheap, continuous)
 

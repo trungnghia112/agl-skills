@@ -1,0 +1,25 @@
+name: validate
+
+# The same gate scripts/release.sh runs before tagging — run it on every push
+# and pull request too, so a broken version number or a dangling reference link
+# is caught while it is still one commit to fix, not after it has shipped.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # fetch-depth: 0 brings the tags with it. Without them, the
+          # "is the version behind the newest tag?" check has nothing to
+          # compare against and skips — a green run that verified less
+          # than it appears to.
+          fetch-depth: 0
+
+      - name: validate
+        run: bash scripts/validate.sh

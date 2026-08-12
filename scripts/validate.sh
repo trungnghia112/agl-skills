@@ -77,7 +77,12 @@ fi
 # --- 3. version vs newest tag ---------------------------------------------
 newest_tag="$(git tag --list 'v[0-9]*' | sed 's/^v//' \
   | sort -t. -k1,1n -k2,2n -k3,3n | tail -1)"
-if [ -n "$newest_tag" ] && [ -n "$plugin_ver" ]; then
+if [ -z "$newest_tag" ]; then
+  # Say so rather than passing quietly: a shallow CI checkout fetches no tags,
+  # and a check that silently skips itself reads exactly like a check that passed.
+  echo "  ! no vX.Y.Z tags visible — skipping the tag comparison"
+  echo "    (in CI this means the checkout has no tags: use fetch-depth: 0)"
+elif [ -n "$plugin_ver" ]; then
   if ! python3 -c '
 import sys
 cur = tuple(int(x) for x in sys.argv[1].split("."))

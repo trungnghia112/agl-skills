@@ -21,7 +21,8 @@
 #      frontmatter with a name + description
 #   5. every ${CLAUDE_PLUGIN_ROOT}/references/*.md link resolves (commands AND agents)
 #   6. no reference file is orphaned (nothing reads it)
-#   7. no pinned model version in the live guidance surface — the policy is
+#   7. every runner script path in commands, references, and agents resolves
+#   8. no pinned model version in the live guidance surface — the policy is
 #      that slugs name a family, never a version (this is the check that would
 #      have caught the stale "Opus 4.8" shipped in v1.5.4)
 #
@@ -170,7 +171,39 @@ for f in references/*.md; do
 done
 ok "$(wc -l <<<"$referenced" | tr -d ' ') reference links resolve, no orphans"
 
-# --- 7. no pinned model versions ------------------------------------------
+# --- 7. runner script paths -----------------------------------------------
+# A typo or a moved runner leaves working guidance pointing at a missing file.
+section "runner script paths"
+if ! script_paths="$(python3 -c '
+from pathlib import Path
+import re
+
+paths = set()
+for root in ("commands", "references", "agents"):
+    for source in sorted(Path(root).rglob("*")):
+        if not source.is_file():
+            continue
+        text = source.read_text()
+        for prefix, target in (
+            ("${CLAUDE_PLUGIN_ROOT}/scripts/", "scripts/"),
+            ("${SCRIPTS}/", "scripts/fusion/"),
+        ):
+            for path in re.findall(re.escape(prefix) + r"([A-Za-z0-9_./-]+\.sh)\b", text):
+                paths.add(str(Path(target + path)))
+print("\n".join(sorted(paths)))
+' 2>&1)"; then
+  problem "could not scan runner script paths: $script_paths"
+else
+  n_script=0
+  while IFS= read -r p; do
+    [ -n "$p" ] || continue
+    n_script=$((n_script + 1))
+    [ -f "$p" ] || problem "a command, reference, or agent links $p, which does not exist"
+  done <<<"$script_paths"
+  ok "$n_script runner script paths resolve"
+fi
+
+# --- 8. no pinned model versions ------------------------------------------
 # The live guidance surface names model FAMILIES only, so upgrading a CLI's
 # default silently upgrades us. CHANGELOG.md is exempt: it is a historical
 # record, and history is allowed to name the version it shipped with.

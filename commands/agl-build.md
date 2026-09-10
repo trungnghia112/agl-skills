@@ -4,8 +4,10 @@ description: Implement plan tasks with TDD — one task and stop, or "auto" for 
 
 Read `${CLAUDE_PLUGIN_ROOT}/references/core-behaviors.md` (once per session).
 `$ARGUMENTS`: empty = one task; `auto` (or `all`) = whole plan, single
-checkpoint. Check BRAIN.md for gotchas/runbook relevant to the files touched
-— and verify any recalled memory against current code before relying on it.
+checkpoint; add `delegate` to route the typing to the codex lane instead of
+writing it yourself (see below). Check BRAIN.md for gotchas/runbook relevant to
+the files touched — and verify any recalled memory against current code before
+relying on it.
 
 ## Per-task loop (both modes — this never gets skipped or shortened)
 
@@ -55,6 +57,33 @@ checkpoint. Check BRAIN.md for gotchas/runbook relevant to the files touched
    On resume, `/agl-build auto` continues from the next pending task.
 7. End-of-run summary: tasks done, tests added, commits made, anything
    skipped or flagged.
+
+## Delegate mode (`/agl-build delegate`, `/agl-build auto delegate`)
+
+Opt-in, never the default. The per-task loop above is unchanged in every
+respect except **who types step 4**: instead of writing the GREEN code
+yourself, you write a six-part spec and hand it to the `agl-codex-lane` agent,
+then verify the diff it produces. Doctrine and the spec contract:
+`${CLAUDE_PLUGIN_ROOT}/references/delegation.md`.
+
+What does NOT change: you still write the RED test yourself (step 3 — the test
+is the specification of correctness, and delegating it delegates the
+definition of done), you still run the full suite (step 5), you still own the
+commit (step 6), and ✅ still requires both the task's `acceptance:` and the
+Definition of Done. Delegation changes who types, never what "done" means.
+
+Three rules specific to this mode:
+
+- **Re-run the verification yourself.** The lane's report is a claim; your
+  re-run is the evidence (core-behaviors #6).
+- **A wrong diff gets a corrected spec, not a hand-patch.** Fixing it yourself
+  is how the saving evaporates and the cross-vendor check turns back into
+  self-review.
+- **`STATUS: unavailable` (no codex) stops the delegation, not the build.** Say
+  so out loud, then either continue in normal mode or stop — never let a
+  same-vendor model type under the lane's banner.
+
+For a one-off delegation outside the plan loop, use `/agl-delegate` instead.
 
 ## Verification rung
 

@@ -97,15 +97,67 @@ panelists honor `.agl/CONSTITUTION.md` on project-scoped questions, and get a
 on time-sensitive ones. The runner scripts in `scripts/fusion/` are self-contained
 (bash/perl/python3 + optional `codex`/`agy`).
 
+## Delegation — cross-vendor implementation lanes
+
+`/agl-delegate` (and `/agl-build delegate`) turns the session into an
+**architect**: it decides, specifies, routes, and judges — and hands the typing
+to GPT through the `codex` CLI, on your real working tree. The premium is spent
+on the architecture and on judging the diff, not on emitting boilerplate. And
+because the code comes from a different model family than the session, the
+review that follows is a genuine cross-vendor check instead of same-family
+self-review.
+
+```
+/agl-delegate <task>      one-off: six-part spec → lane types → you verify the diff
+/agl-build delegate       the TDD loop, with the lane typing the GREEN code
+```
+
+Delegation is **opt-in** — `/agl-build` runs the session's own TDD loop by
+default and nothing routes to a lane unless you asked. You always keep the RED
+test, the full suite, and the commit: delegation changes *who types*, never what
+"done" means.
+
+Two agents ship with it, invoked only by those commands, never on their own:
+
+- **`agl-codex-lane`** — delivers the spec, supervises the run, verifies
+  independently, reports with evidence. It never implements the task itself:
+  no `codex` means `STATUS: unavailable` and a stop, because a cross-vendor lane
+  that quietly becomes a same-vendor lane is worse than a loud failure.
+- **`agl-advisor`** — read-only second opinion at commitment boundaries and once
+  at the end of a deliverable: ship / fix-first / rethink, under 300 words. It
+  buys fresh context, not an independent model — `/agl-review` and `/agl-fusion`
+  remain the deeper checks.
+
+Two things the lane gets mechanically right, because neither can be trusted to
+narration:
+
+- **An empty diff is a refusal, not a success.** `codex exec` returns 0 when it
+  declines the work, so the runner fingerprints the working tree before and
+  after and reports `refused` when nothing changed.
+- **A global `~/.codex/AGENTS.md` cannot hijack the lane.** A user-level file
+  that mandates its own workflow makes codex decline politely with exit 0 and an
+  empty diff. The runner prepends a scoped opt-out for this lane only, leaving
+  every other instruction in that file in force.
+
+Nothing is pinned: the lane runs on whatever `codex` is configured to use, and
+escalation is a **reasoning-effort rung** the spec names (`low` → `ultra`),
+never a hardcoded model slug. Wall clock defaults to 900s
+(`AGL_LANE_TIMEOUT`); the sandbox is `workspace-write`, never full access.
+
 ## Structure
 
 ```
 agl-skills/
 ├── .claude-plugin/plugin.json
-├── commands/        # 21 /agl-* commands (loaded only when invoked — near-zero background tokens)
+├── commands/        # 22 /agl-* commands (loaded only when invoked — near-zero background tokens)
+├── agents/          # agl-codex-lane (delegation) + agl-advisor (second opinion)
 ├── references/
-│   ├── core-behaviors.md   # core rules every command follows
-│   ├── brain-format.md     # .agl/ spec + memory rules
-│   └── fusion.md           # panel → judge doctrine (Track A/B + the agl upgrades)
-└── scripts/fusion/  # self-contained panelist runners (codex, agy pseudo-TTY, perl timeout, provenance)
+│   ├── core-behaviors.md      # core rules every command follows
+│   ├── brain-format.md        # .agl/ spec + memory rules
+│   ├── definition-of-done.md  # the standing bar, separate from per-task acceptance
+│   ├── delegation.md          # architect ↔ lane doctrine, spec contract, verification
+│   └── fusion.md              # panel → judge doctrine (Track A/B + the agl upgrades)
+└── scripts/
+    ├── fusion/      # self-contained panelist runners (codex, agy pseudo-TTY, perl timeout, provenance)
+    └── delegate/    # the implementation lane runner (workspace-write, empty-diff detection)
 ```

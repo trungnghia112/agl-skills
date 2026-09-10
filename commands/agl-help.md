@@ -21,6 +21,8 @@ if `$ARGUMENTS` asks something specific:
 | `/agl-converge` | Check the plan against the actual CODE (not just the other docs); appends gap-tasks, never rewrites |
 | `/agl-build` | TDD per task: red test → green code → suite → commit → stop |
 | `/agl-build auto` | Approve once → run the whole plan, auto-stop at risky tasks |
+| `/agl-build delegate` | Same loop, but the codex lane types the GREEN code — you keep the RED test, the suite, and the commit |
+| `/agl-delegate <task>` | One-off delegation: you write the six-part spec + pick the effort rung, the lane types, you verify the diff |
 | `/agl-test` | Plug test gaps + run the suite + live UAT when needed (diff the real payload against the plan's `## Contracts`) |
 | `/agl-review` | Five-axis review, every finding challenged before it's reported |
 | `/agl-audit` | Security/deps/perf — every risk-accept needs a dated re-report trigger |
@@ -36,6 +38,17 @@ if `$ARGUMENTS` asks something specific:
 | `/agl-fusion-gemini <q>` | Pinned Opus + Gemini panel (falls back to two Opus runs if `agy` missing) |
 | `/agl-fusion-opus <q>` | Pinned two-independent-Opus panel — zero external CLI, works everywhere |
 | `/agl-fusion-plan <goal>` | Iterative 3-round panel that deepens an `/agl-plan` seed, then hands off to `/agl-analyze` → `/agl-build` |
+
+| Delegation (cross-vendor lane) | |
+|---|---|
+| `agl-codex-lane` | Agent that hands a spec to GPT via the `codex` CLI on the live tree, then verifies. Empty diff is detected mechanically and reported as a refusal, never as success |
+| `agl-advisor` | Read-only second opinion at commitment boundaries and end-of-deliverable: ship / fix-first / rethink, under 300 words |
+
+Both agents are invoked by `/agl-delegate` and `/agl-build delegate` only —
+never on their own (P1). No `codex` means the lane reports `unavailable` and
+stops; it never quietly types the code itself, because the whole point is that
+the code comes from a different model family than the reviewer. Doctrine:
+`references/delegation.md`.
 
 Fusion runs are mirrored into `.agl/fusion-runs/` (project brain) so they surface
 in `/agl-recap`; on project-scoped questions panelists honor `.agl/CONSTITUTION.md`. All

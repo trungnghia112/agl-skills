@@ -16,35 +16,47 @@
 #   2. plugin.json version == the newest CHANGELOG entry  (three places now
 #      carry the version; this is the one that catches a hand-edit drifting)
 #   3. plugin.json version is not behind the newest vX.Y.Z tag
-#   4. every command has frontmatter with a description
-#   5. every ${CLAUDE_PLUGIN_ROOT}/references/*.md link resolves
+#   4. every command has frontmatter with a description, and every agent has
+#      frontmatter with a name + description
+#   5. every ${CLAUDE_PLUGIN_ROOT}/references/*.md link resolves (commands AND agents)
 #   6. no reference file is orphaned (nothing reads it)
 #   7. no pinned model version in the live guidance surface — the policy is
 #      that slugs name a family, never a version (this is the check that would
 #      have caught the stale "Opus 4.8" shipped in v1.5.4)
+#
+# scripts/ is deliberately NOT scanned by check 7: this file's own header quotes
+# the historical "Opus 4.8" bug it exists to prevent, and a check that trips over
+# its own documentation is a check people delete.
 
 set -uo pipefail
 cd "$(git rev-parse --show-toplevel)"
 
 fail=0
 problem() { printf '  ✗ %s\n' "$1"; fail=1; }
-section() { printf '\n%s\n' "$1"; }
+section() { printf '\n%s\n' "$1"; _mark="$fail"; }
+# ok <msg> — print a section's ✓ summary only if that section reported nothing.
+# Without this a section prints "✗ agents/x.md has no name:" and then cheerfully
+# claims "✓ 3 agents carry frontmatter", which reads like the check passed.
+ok() { [ "$fail" = "${_mark:-0}" ] && printf '  ✓ %s\n' "$1"; }
 
 # --- 1. manifests ----------------------------------------------------------
 section "manifests"
-plugin_name=""; plugin_ver=""; market_name=""; commands_dir=""
+plugin_name=""; plugin_ver=""; market_name=""; commands_dir=""; agents_dir=""
 if ! plugin_json="$(python3 -c '
 import json
 d = json.load(open(".claude-plugin/plugin.json"))
-print(d.get("name",""));print(d.get("version",""));print(d.get("commands",""))
+print(d.get("name",""));print(d.get("version",""));print(d.get("commands",""));print(d.get("agents",""))
 ' 2>&1)"; then
   problem ".claude-plugin/plugin.json does not parse: $plugin_json"
 else
   plugin_name="$(sed -n 1p <<<"$plugin_json")"
   plugin_ver="$(sed -n 2p <<<"$plugin_json")"
   commands_dir="$(sed -n 3p <<<"$plugin_json")"
+  agents_dir="$(sed -n 4p <<<"$plugin_json")"
   [ -n "$plugin_ver" ] || problem "plugin.json has no version"
   [ -d "$commands_dir" ] || problem "plugin.json commands path does not exist: $commands_dir"
+  # A declared-but-missing agents path ships a plugin whose subagents silently don't exist.
+  [ -z "$agents_dir" ] || [ -d "$agents_dir" ] || problem "plugin.json agents path does not exist: $agents_dir"
 fi
 
 if ! market_name="$(python3 -c '
@@ -104,18 +116,34 @@ for f in commands/*.md; do
   head -5 "$f" | grep -q '^description:' || problem "$f frontmatter has no description:"
 done
 [ "$n_cmd" -gt 0 ] || problem "no command files found in commands/"
-echo "  ✓ $n_cmd commands carry frontmatter with a description"
+ok "$n_cmd commands carry frontmatter with a description"
+
+# Agents are a live surface too: Claude Code keeps every agent description in
+# context, so a nameless or description-less agent is both unusable and a tax.
+if [ -d agents ]; then
+  section "agents"
+  n_agent=0
+  for f in agents/*.md; do
+    [ -e "$f" ] || continue
+    n_agent=$((n_agent + 1))
+    [ "$(head -1 "$f")" = "---" ] || { problem "$f does not open with frontmatter"; continue; }
+    head -8 "$f" | grep -q '^name:' || problem "$f frontmatter has no name:"
+    head -8 "$f" | grep -q '^description:' || problem "$f frontmatter has no description:"
+  done
+  [ "$n_agent" -gt 0 ] || problem "agents/ exists but holds no agent files"
+  ok "$n_agent agents carry frontmatter with a name and a description"
+fi
 
 # --- 5 + 6. reference links ------------------------------------------------
 section "references"
-referenced="$(grep -rho 'references/[A-Za-z0-9_-]*\.md' commands/ | sort -u)"
+referenced="$(grep -rho 'references/[A-Za-z0-9_-]*\.md' commands/ agents/ 2>/dev/null | sort -u)"
 for p in $referenced; do
-  [ -f "$p" ] || problem "a command links $p, which does not exist"
+  [ -f "$p" ] || problem "a command or agent links $p, which does not exist"
 done
 for f in references/*.md; do
-  grep -q "^$f$" <<<"$referenced" || problem "$f is never read by any command (orphan)"
+  grep -q "^$f$" <<<"$referenced" || problem "$f is never read by any command or agent (orphan)"
 done
-echo "  ✓ $(wc -l <<<"$referenced" | tr -d ' ') reference links resolve, no orphans"
+ok "$(wc -l <<<"$referenced" | tr -d ' ') reference links resolve, no orphans"
 
 # --- 7. no pinned model versions ------------------------------------------
 # The live guidance surface names model FAMILIES only, so upgrading a CLI's
@@ -123,11 +151,11 @@ echo "  ✓ $(wc -l <<<"$referenced" | tr -d ' ') reference links resolve, no or
 # record, and history is allowed to name the version it shipped with.
 section "de-versioned model names"
 hits="$(grep -rnE '(Opus|Sonnet|Haiku|GPT|Gemini|Fable)[- ]?[0-9]+\.[0-9]+' \
-  commands/ references/ README.md 2>/dev/null)"
+  commands/ references/ agents/ README.md 2>/dev/null)"
 if [ -n "$hits" ]; then
   while IFS= read -r line; do problem "pinned model version: $line"; done <<<"$hits"
 else
-  echo "  ✓ no pinned model versions in commands/, references/, README.md"
+  echo "  ✓ no pinned model versions in commands/, references/, agents/, README.md"
 fi
 
 # --- verdict ---------------------------------------------------------------

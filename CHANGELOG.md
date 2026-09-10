@@ -7,6 +7,45 @@ mechanics.
 Versions follow [semver](https://semver.org): the bump reflects what you can
 observe, not the size of the diff. Each release is the `vX.Y.Z` tag on `main`.
 
+## [1.7.0] - 2026-09-10
+
+### Added
+- **Delegation — cross-vendor implementation lanes.** `/agl-delegate` (one-off)
+  and `/agl-build delegate` (inside the TDD loop) turn the session into an
+  architect: it writes a six-part spec, names a reasoning-effort rung, and hands
+  the typing to GPT through the `codex` CLI on your real working tree. You keep
+  the RED test, the full suite, and the commit — delegation changes who types,
+  never what "done" means. Opt-in; `/agl-build` still runs its own loop by
+  default. Doctrine in `references/delegation.md`.
+- **`agents/`** — the plugin ships subagents for the first time.
+  `agl-codex-lane` delivers the spec, supervises codex, verifies independently,
+  and reports with evidence; `agl-advisor` gives a read-only ship / fix-first /
+  rethink verdict under 300 words at commitment boundaries and once at the end
+  of a deliverable. Both are invoked only by `/agl-delegate` and
+  `/agl-build delegate` — nothing auto-activates (constitution P1).
+- **`scripts/delegate/run_codex_lane.sh`** — the lane runner. Sandboxed to
+  `workspace-write` (never full access), capped by `AGL_LANE_TIMEOUT` (900s) on
+  a stock-macOS perl timeout, and it fingerprints the working tree before and
+  after so **an empty diff is caught mechanically**: `codex exec` returns 0 when
+  it declines the work, so exit status alone cannot tell "done" from "refused".
+- **The hijacked-lane defense.** A global `~/.codex/AGENTS.md` that mandates its
+  own workflow makes codex decline politely — exit 0, empty diff, nothing in the
+  status to reveal it. The runner prepends a scoped opt-out for this lane only,
+  leaving every other instruction in that file in force.
+
+### Changed
+- The lane **never** falls back to implementing a task itself. No `codex` means
+  `STATUS: unavailable` and a stop: a cross-vendor lane that quietly becomes a
+  same-vendor lane defeats the only reason it exists.
+- Escalation is a **reasoning-effort rung** the spec names (`low` → `ultra`),
+  never a hardcoded model slug — the lane runs on whatever `codex` is configured
+  to use, so upgrading the CLI's default silently upgrades us. Same rule fusion
+  has always followed.
+- `scripts/validate.sh` now gates `agents/` too: frontmatter must carry a name
+  and a description, reference links from agents must resolve, a declared-but-
+  missing `agents` path in plugin.json is an error, and the no-pinned-model-
+  version check covers `agents/` alongside commands, references, and the README.
+
 ## [1.6.0] - 2026-08-12
 
 ### Added

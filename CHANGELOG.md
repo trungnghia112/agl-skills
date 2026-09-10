@@ -7,6 +7,18 @@ mechanics.
 Versions follow [semver](https://semver.org): the bump reflects what you can
 observe, not the size of the diff. Each release is the `vX.Y.Z` tag on `main`.
 
+## [1.7.1] - 2026-09-10
+
+### Fixed
+- **1.7.0 could not be installed.** Its `plugin.json` declared
+  `"agents": "./agents"` — a directory string — and Claude Code's manifest
+  schema wants a list of agent **files**, so `plugin update` failed with
+  `agents: Invalid input`. The key is now the explicit file list, and
+  `scripts/validate.sh` checks it **both ways**: a listed file that doesn't
+  exist ships a dead entry, and an agent sitting in `agents/` that nobody listed
+  silently never reaches users. Install 1.7.1 directly; 1.7.0 has no usable
+  build.
+
 ## [1.7.0] - 2026-09-10
 
 ### Added

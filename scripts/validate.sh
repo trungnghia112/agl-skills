@@ -12,7 +12,8 @@
 # to hang a Node toolchain from.
 #
 # What it checks, and why each one exists:
-#   1. manifests parse, and plugin.json / marketplace.json agree on the name
+#   1. manifests parse, plugin.json / marketplace.json agree on the name, and the
+#      plugin.json "agents" FILE LIST matches agents/ on disk in both directions
 #   2. plugin.json version == the newest CHANGELOG entry  (three places now
 #      carry the version; this is the one that catches a hand-edit drifting)
 #   3. plugin.json version is not behind the newest vX.Y.Z tag
@@ -41,22 +42,46 @@ ok() { [ "$fail" = "${_mark:-0}" ] && printf '  ✓ %s\n' "$1"; }
 
 # --- 1. manifests ----------------------------------------------------------
 section "manifests"
-plugin_name=""; plugin_ver=""; market_name=""; commands_dir=""; agents_dir=""
+plugin_name=""; plugin_ver=""; market_name=""; commands_dir=""; agents_shape=""; agents_list=""
 if ! plugin_json="$(python3 -c '
 import json
 d = json.load(open(".claude-plugin/plugin.json"))
-print(d.get("name",""));print(d.get("version",""));print(d.get("commands",""));print(d.get("agents",""))
+print(d.get("name",""));print(d.get("version",""));print(d.get("commands",""))
+a = d.get("agents")
+# Line 4 is the SHAPE, line 5 the values. Without the shape line a string like
+# "./agents/" joins character-by-character and the findings become nonsense.
+print("none" if a is None else ("list" if isinstance(a, list) else "other"))
+print("\u001f".join(a) if isinstance(a, list) else "")
 ' 2>&1)"; then
   problem ".claude-plugin/plugin.json does not parse: $plugin_json"
 else
   plugin_name="$(sed -n 1p <<<"$plugin_json")"
   plugin_ver="$(sed -n 2p <<<"$plugin_json")"
   commands_dir="$(sed -n 3p <<<"$plugin_json")"
-  agents_dir="$(sed -n 4p <<<"$plugin_json")"
+  agents_shape="$(sed -n 4p <<<"$plugin_json")"
+  agents_list="$(sed -n 5p <<<"$plugin_json")"
   [ -n "$plugin_ver" ] || problem "plugin.json has no version"
   [ -d "$commands_dir" ] || problem "plugin.json commands path does not exist: $commands_dir"
-  # A declared-but-missing agents path ships a plugin whose subagents silently don't exist.
-  [ -z "$agents_dir" ] || [ -d "$agents_dir" ] || problem "plugin.json agents path does not exist: $agents_dir"
+  # `agents` is a list of FILES, not a directory — a directory string makes the
+  # plugin fail to install with "agents: Invalid input" (shipped broken in 1.7.0).
+  # Both directions are checked: a listed file that doesn't exist ships a dead
+  # entry, and an agent on disk that isn't listed silently never reaches users.
+  if [ "$agents_shape" = "other" ]; then
+    problem 'plugin.json "agents" must be a LIST of agent files, e.g. ["./agents/x.md"] — a directory string fails to install with "agents: Invalid input"'
+  elif [ -n "$agents_list" ]; then
+    while IFS= read -r a; do
+      [ -n "$a" ] || continue
+      case "$a" in */) problem "plugin.json agents entry is a directory, not a file: $a"; continue ;; esac
+      [ -f "${a#./}" ] || problem "plugin.json lists an agent that does not exist: $a"
+    done < <(tr '\037' '\n' <<<"$agents_list")
+  fi
+  if [ "$agents_shape" != "other" ]; then
+    for f in agents/*.md; do
+      [ -e "$f" ] || continue
+      tr '\037' '\n' <<<"$agents_list" | grep -qx "./$f" \
+        || problem "$f exists but is not listed in plugin.json \"agents\" — it will not ship"
+    done
+  fi
 fi
 
 if ! market_name="$(python3 -c '

@@ -30,6 +30,10 @@ if `$ARGUMENTS` asks something specific:
 | `/agl-ship` | Gate on evidence → changelog → push → auto-save the brain |
 | `/agl-next` | Suggest the next task from the backlog (check git before suggesting) |
 
+| Environment | |
+|---|---|
+| `/agl-env-bundle` | Restore / set up / repack `secrets/env-bundle.zip` — an AES-256 archive of the repo's gitignored `.env` files, committed so a fresh clone gets its whole configuration back. Packs the full inventory by default, and an undeclared missing env file fails the pack |
+
 | Fusion (multi-model panel) | |
 |---|---|
 | `/agl-fusion <q>` | Fan a hard question to a blind PANEL of models in parallel → Opus judges + adversarially verifies → grounded answer. Auto-picks the richest panel installed |

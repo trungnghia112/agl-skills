@@ -7,6 +7,35 @@ mechanics.
 Versions follow [semver](https://semver.org): the bump reflects what you can
 observe, not the size of the diff. Each release is the `vX.Y.Z` tag on `main`.
 
+## [1.8.0] - 2026-09-11
+
+### Added
+- **`/agl-env-bundle` — a clone that brings its own configuration.** Commits an
+  AES-256 encrypted archive of a private repo's gitignored `.env` files, so a new
+  machine restores the whole configuration instead of collecting six files over
+  Slack. Three modes (restore / setup / repack), detected from the repo state.
+
+  What it refuses to do is the point. `pack` takes the **whole inventory** by
+  default, because the way this pattern really fails is a new env file missing
+  from a hand-typed list: the pack succeeds, the archive verifies, and the next
+  clone is quietly short one secret. An undeclared gap between the archive and
+  disk now **fails the pack** — leaving a file out has to be declared
+  (`ENV_BUNDLE_EXCLUDE`), and the declaration is still printed. It also refuses
+  to pack without a resolved password (never invents one, and there is no weak
+  default to fall back to), refuses a path that escapes the repo root, deletes
+  any archive that fails verification, and hard-fails preflight on a public repo.
+
+  `restore` **skips files that already exist** rather than overwriting them —
+  env files are gitignored, so a clobbered local edit is not recoverable with
+  git. `--force` is the explicit opt-in. `secrets/README.md` is generated from
+  the archive's real contents instead of a hand-filled template, so the doc
+  cannot drift from the file list.
+
+  Doctrine (password menu, threat model, when to move to SOPS or a secret
+  manager): `references/env-bundle.md`. `scripts/test-env-bundle.sh` holds one
+  regression case per defect above, so a later edit cannot quietly bring one
+  back; it is separate from `validate.sh` because it needs 7-Zip and CI has none.
+
 ## [1.7.1] - 2026-09-10
 
 ### Fixed

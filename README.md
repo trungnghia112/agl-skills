@@ -144,12 +144,37 @@ escalation is a **reasoning-effort rung** the spec names (`low` → `ultra`),
 never a hardcoded model slug. Wall clock defaults to 900s
 (`AGL_LANE_TIMEOUT`); the sandbox is `workspace-write`, never full access.
 
+## Env bundle — a clone that brings its own configuration
+
+`.env*` files are gitignored, so a fresh clone of a private repo starts with no
+configuration and somebody has to hand over six files on Slack.
+`/agl-env-bundle` commits an **AES-256 encrypted** archive of them instead:
+
+```
+/agl-env-bundle            # detects restore / setup / repack
+/agl-env-bundle restore    # new machine: existing files are SKIPPED, never clobbered
+```
+
+The interesting part is what it refuses to do. `pack` packs the **whole
+inventory** by default, because the way this pattern really fails is a new env
+file missing from a hand-typed list — the pack succeeds, the archive verifies,
+and the next clone is quietly short one secret. An undeclared gap between the
+archive and what is on disk **fails the pack**; leaving a file out has to be
+said out loud (`ENV_BUNDLE_EXCLUDE`). It also refuses to pack without a
+resolved password (never invents or defaults to one), refuses a path that
+escapes the repo root, refuses to leave an unverified archive on disk, and
+hard-fails preflight on a public repo. `secrets/README.md` is generated from
+the archive's real contents, so the doc cannot drift from the file list.
+
+Doctrine — password policy, threat model, and when to move to SOPS or a secret
+manager: `references/env-bundle.md`.
+
 ## Structure
 
 ```
 agl-skills/
 ├── .claude-plugin/plugin.json
-├── commands/        # 22 /agl-* commands (loaded only when invoked — near-zero background tokens)
+├── commands/        # 23 /agl-* commands (loaded only when invoked — near-zero background tokens)
 ├── agents/          # agl-codex-lane (delegation) + agl-advisor (second opinion)
 ├── references/
 │   ├── core-behaviors.md      # core rules every command follows
@@ -158,6 +183,7 @@ agl-skills/
 │   ├── delegation.md          # architect ↔ lane doctrine, spec contract, verification
 │   └── fusion.md              # panel → judge doctrine (Track A/B + the agl upgrades)
 └── scripts/
+    ├── env-bundle.sh # AES-256 env bundle runner (+ test-env-bundle.sh regression suite)
     ├── fusion/      # self-contained panelist runners (codex, agy pseudo-TTY, perl timeout, provenance)
     └── delegate/    # the implementation lane runner (workspace-write, empty-diff detection)
 ```

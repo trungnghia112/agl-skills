@@ -27,30 +27,34 @@ and ask only if it stays ambiguous:
 | **SETUP** | no archive yet | §4 |
 | **REPACK** | archive exists, env files changed | §5 |
 
-## 1. The password is resolved, never invented
+## 1. The password is this project's own — resolved, never invented
 
-`bash "$EB" pack` resolves it in this order and prints which one won:
+**Every project has its own password** (a group of projects may deliberately
+share one through a common `auth-info/`). A workspace holding several projects
+therefore holds several passwords, and that is correct. **Never suggest
+"unifying" them** — that is a rotation of every bundle involved, and it is the
+owner's security decision, not a tidy-up.
+
+The script collects every candidate, most specific first, and prints which one
+it used:
 
 | | Source | Note |
 |---|---|---|
-| 1 | `$ENV_BUNDLE_PASS` | An explicit export wins. One-off, stored nowhere. |
-| 2 | `auth-info/zip.env`, searched **upwards** from the repo root | The normal case. `PASSWORD=` or `PASS_ZIP=`. Lives outside every git repo, so one password serves every bundle in the workspace. Rename it with `ENV_BUNDLE_SHARED_PASS_REL`. |
-| 3 | `PASS_ZIP=` in this repo's `.env.bak` | Legacy fallback for a repo outside any workspace. |
+| 1 | `$ENV_BUNDLE_PASS` | An explicit export. One-off, stored nowhere. |
+| 2 | `PASS_ZIP=` in this repo's `.env.bak` | The repo's own copy. Often lives *inside* the archive, so a fresh clone does not have it yet. |
+| 3 | walking **upwards** from the repo root, at each level: `auth-info/zip.<repo-folder>.env`, then `auth-info/zip.env` | `PASSWORD=` or `PASS_ZIP=`, outside every git repo. The first name is **this project's**; the second is a **group's**. The nearest `zip.env` may belong to a sibling project — that is why candidates are tested, not trusted. |
 
-**When it resolves one, USE IT and say where it came from — do not ask again.**
-Two passwords for one workspace means half the bundles open with one string and
-half with the other.
+**When an archive exists, the candidate that actually OPENS it wins** —
+`restore`, `verify` and `pack` all test with 7-Zip before using one. A candidate
+that does not open it is listed in the report, never used.
 
-When it finds nothing, `pack` **refuses** and prints the three places it looked.
-Do not invent a password and do not take a default: a bundle packed with a
-password the team does not hold is a bundle nobody can restore, and it looks
-fine until somebody tries. Ask the owner — first *where their password file is*
-(it is usually one directory further up), and only if there is none, offer the
-menu in [references/env-bundle.md](${CLAUDE_PLUGIN_ROOT}/references/env-bundle.md).
-
-`restore` is the one command allowed to proceed without a stored password — a
-human is at the keyboard and 7-Zip prompts. `pack` is not: there the password
-*becomes* the archive.
+When nothing opens the archive: `restore` writes **nothing** (on a terminal it
+asks for the password and tests it first); `pack` **refuses** — packing would
+silently change the password of a bundle other people rely on. Ask the owner for
+**this project's** password and where they keep it. Do not borrow another
+project's, do not invent one, do not take a default. Only when they confirm the
+project has none yet, offer the menu in
+[references/env-bundle.md](${CLAUDE_PLUGIN_ROOT}/references/env-bundle.md).
 
 ## 2. Preflight — every mode, no exceptions
 
@@ -78,14 +82,25 @@ bash "$EB" restore --force    # only when the owner asks for the archive's copy
 
 Env files are gitignored, so an overwrite is **not** recoverable with git —
 that is why skip-existing is the default. The script names every file it
-skipped; relay that list. Then confirm the app reads the env (run the project's
-own env command if it has one) and go to §7.
+skipped; relay that list. An existing **empty** file whose archive copy is not
+empty is replaced and reported: that is debris from a failed extraction, not a
+local edit. Then confirm the app reads the env (run the project's own env
+command if it has one) and go to §7.
+
+If the password came from the repo's own `.env.bak` or was typed, the next fresh
+clone will not find it. Offer to store it as `auth-info/zip.<repo-folder>.env`
+above the repo — writing a secret to disk is the owner's call.
 
 ## 4. SETUP
 
 1. `bash "$EB" inventory` — show the list and get the owner to **confirm** it.
    Stale or machine-local files should not go in.
-2. Password per §1. Store it where §1 will find it next time.
+2. Password per §1. With no archive yet there is nothing to test a candidate
+   against, and the nearest `auth-info/zip.env` may be a sibling project's — so
+   the script warns on every first pack, and you **confirm with the owner** that
+   the source it names is this project's password. Store it as
+   `auth-info/zip.<repo-folder>.env` (this project) or `auth-info/zip.env` (a
+   group that deliberately shares one).
 3. Pack — §5.
 4. `bash "$EB" readme` — writes `secrets/README.md` from the archive's **real**
    contents, so the doc cannot drift from the file list.
@@ -114,8 +129,14 @@ ENV_BUNDLE_EXCLUDE=".env.local" bash "$EB" pack
 ```
 
 A **different** password than the current bundle's is not a repack — it is a
-rotation. Say so plainly: every teammate has to be given the new one, and old
-archives in history still open with the old password.
+rotation, and `pack` refuses it unless asked for by name:
+
+```bash
+ENV_BUNDLE_ROTATE=1 ENV_BUNDLE_PASS='<new>' bash "$EB" pack   # owner's decision only
+```
+
+Say so plainly: every teammate has to be given the new one, and old archives in
+history still open with the old password.
 
 Re-run `bash "$EB" readme` if the file list changed, then §7.
 
@@ -136,4 +157,6 @@ Report: mode, archive path + entry count + "AES-256 verified", the file list,
 the commit hash or "not committed — waiting on you".
 
 Then a numbered menu with exactly one recommendation — typically: commit the
-bundle now / repack including the files you left out / rotate the password.
+bundle now / repack including the files you left out / store this project's
+password where a fresh clone finds it. Rotating a password is never the
+recommendation, and "one password for the whole workspace" is never an option.

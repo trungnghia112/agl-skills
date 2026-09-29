@@ -13,15 +13,19 @@
 #
 # ENV_BUNDLE_EXCLUDE="path ..." declares env files deliberately left out.
 #
-# Password, in order: $ENV_BUNDLE_PASS, the shared store (auth-info/zip.env,
-# searched UPWARDS from the repo root), then PASS_ZIP= in this repo's .env.bak.
-# Never pass the password as an argument to this script.
+# Passwords are PER PROJECT (or per group of projects that share one auth-info/).
+# Candidates, in order: $ENV_BUNDLE_PASS, PASS_ZIP= in this repo's .env.bak, then
+# walking UPWARDS from the repo root, at each level auth-info/zip.<repo>.env (this
+# project's own) before auth-info/zip.env (a group's). When an archive exists, the
+# first candidate that actually OPENS it wins. Never pass the password as an
+# argument to this script.
 set -uo pipefail
 
 ARCHIVE="${ENV_BUNDLE_ARCHIVE:-secrets/env-bundle.zip}"
 PASS_FILE="${ENV_BUNDLE_PASS_FILE:-.env.bak}"
-# The SHARED store, searched upwards from the repo root. One password for every
-# bundle in a workspace, held in a directory that is inside no git repository.
+# The group store, searched upwards from the repo root, in a directory that is
+# inside no git repository. The NEAREST one is not necessarily this project's:
+# a workspace holds many projects, each with its own password.
 SHARED_PASS_REL="${ENV_BUNDLE_SHARED_PASS_REL:-auth-info/zip.env}"
 # Env files deliberately NOT packed (machine-local overrides, a teammate's
 # scratch config) — whitespace-separated paths. Drift is a hard failure, so the
@@ -44,6 +48,11 @@ need_7z() {
 }
 
 cd "$(git rev-parse --show-toplevel 2>/dev/null)" 2>/dev/null || die "not inside a git repository"
+
+# This project's own password file, next to the group one:
+# auth-info/zip.env -> auth-info/zip.<repo-dir-name>.env
+REPO_NAME="$(basename "$(pwd)")"
+PROJECT_PASS_REL="${SHARED_PASS_REL%.env}.${REPO_NAME}.env"
 
 # A path that escapes the repo root. `-spf` stores paths verbatim, so `../x/.env`
 # packs as `../x/.env` and `restore` writes it OUTSIDE the repo — over a file the
@@ -69,58 +78,80 @@ read_pass_file() {
   printf '%s' "$p"
 }
 
+# Every password this repo could be using, most specific first. Collected, not
+# picked: a workspace holds many projects with DIFFERENT passwords, so the nearest
+# auth-info/zip.env may well be a sibling project's. Taking the first file found
+# restored nothing (wrong password) and, worse, let `pack` re-encrypt a project's
+# bundle with another project's password while `verify` reported VERIFIED.
 # Searched UPWARDS, not at a fixed `../auth-info`: a repo may sit one level under
-# the workspace or three, and a path that works from one depth breaks at the next.
-find_shared_pass_file() {
-  local d; d="$(pwd)"
+# the workspace or three.
+CAND_SRC=(); CAND_PASS=()
+add_candidate() { CAND_SRC+=("$1"); CAND_PASS+=("$2"); }
+
+collect_candidates() {
+  CAND_SRC=(); CAND_PASS=()
+  local p d f
+  [ -n "${ENV_BUNDLE_PASS:-}" ] && add_candidate '$ENV_BUNDLE_PASS' "$ENV_BUNDLE_PASS"
+  p="$(read_pass_file "$PASS_FILE")" && add_candidate "$PASS_FILE" "$p"
+  d="$(pwd)"
   while [ "$d" != "/" ]; do
-    [ -f "$d/$SHARED_PASS_REL" ] && { printf '%s' "$d/$SHARED_PASS_REL"; return 0; }
+    for f in "$d/$PROJECT_PASS_REL" "$d/$SHARED_PASS_REL"; do
+      [ -f "$f" ] || continue
+      if p="$(read_pass_file "$f")"; then add_candidate "$f" "$p"
+      else warn "$f exists but holds no PASSWORD= or PASS_ZIP= line"; fi
+    done
     d="$(dirname "$d")"
+  done
+}
+
+# Sets PASS / PASS_SRC to the first candidate that OPENS the archive. The archive
+# is the only authority on which password is this project's; TRIED keeps the
+# sources that did not open it, for the report.
+PASS=""; PASS_SRC=""; TRIED=(); PACKED_PASS=""; PACKED_SRC=""; RESTORE_TMP=""
+resolve_opening() {
+  collect_candidates
+  PASS=""; PASS_SRC=""; TRIED=()
+  [ "${#CAND_PASS[@]}" -gt 0 ] || return 1
+  local i=0
+  while [ "$i" -lt "${#CAND_PASS[@]}" ]; do
+    if "$SZ" t -p"${CAND_PASS[$i]}" "$ARCHIVE" >/dev/null 2>&1; then
+      PASS="${CAND_PASS[$i]}"; PASS_SRC="${CAND_SRC[$i]}"; return 0
+    fi
+    TRIED+=("${CAND_SRC[$i]}")
+    i=$((i + 1))
   done
   return 1
 }
 
-get_pass() {
-  [ -n "${ENV_BUNDLE_PASS:-}" ] && { printf '%s' "$ENV_BUNDLE_PASS"; return 0; }
-  # The shared file comes BEFORE `.env.bak`, deliberately: it is the one place the
-  # workspace's password lives, so when the two disagree the shared one is right
-  # and the repo-local copy is a stale leftover.
-  local shared
-  if shared="$(find_shared_pass_file)"; then
-    read_pass_file "$shared" && return 0
-    warn "$shared exists but holds no PASSWORD= or PASS_ZIP= line"
-  fi
-  read_pass_file "$PASS_FILE" && return 0
-  return 1
+print_tried() {
+  [ "${#TRIED[@]}" -gt 0 ] || return 0
+  printf 'None of these passwords opens %s:\n' "$ARCHIVE" >&2
+  printf '  %s\n' "${TRIED[@]}" >&2
 }
 
-# Where the password came from, for the report. Same order as get_pass.
-pass_source() {
-  [ -n "${ENV_BUNDLE_PASS:-}" ] && { printf '$ENV_BUNDLE_PASS'; return 0; }
-  local shared
-  if shared="$(find_shared_pass_file)" && read_pass_file "$shared" >/dev/null; then
-    printf '%s' "$shared"; return 0
-  fi
-  read_pass_file "$PASS_FILE" >/dev/null && { printf '%s' "$PASS_FILE"; return 0; }
-  printf 'nowhere'
+where_to_store() {
+  cat >&2 <<HELP
+Store THIS project's password where the next run finds it (outside every repo):
+  echo 'PASSWORD=<password>' > <dir-above-the-repo>/$PROJECT_PASS_REL   # this project only
+  echo 'PASSWORD=<password>' > <dir-above-the-repo>/$SHARED_PASS_REL           # a group that shares one
+  ENV_BUNDLE_PASS='<password>' bash \$EB <command>                        # one-off, stored nowhere
+HELP
 }
 
 no_pass_help() {
   cat >&2 <<HELP
 ERROR: no archive password found. Searched, in order:
   1. \$ENV_BUNDLE_PASS        (not set)
-  2. $SHARED_PASS_REL   upwards from $(pwd)  -> not found
-  3. $PASS_FILE               -> no PASS_ZIP= / PASSWORD= line
+  2. $PASS_FILE               -> no PASS_ZIP= / PASSWORD= line
+  3. $PROJECT_PASS_REL, then $SHARED_PASS_REL, upwards from $(pwd) -> none
 
-ASK THE OWNER where their password file is. Do NOT invent a password and do NOT
-fall back to a default: a bundle packed with a password the team does not hold is
-a bundle nobody can restore, and it looks fine until somebody tries.
+ASK THE OWNER for THIS project's password and where they keep it. Passwords are
+per project: do NOT borrow another project's, do NOT invent one, and do NOT fall
+back to a default — a bundle packed with a password the team does not hold is a
+bundle nobody can restore, and it looks fine until somebody tries.
 
-Once they answer:
-  echo 'PASSWORD=<their-password>' > <path>/$SHARED_PASS_REL     # the shared store
-  ENV_BUNDLE_SHARED_PASS_REL=<other/path.env> bash \$EB pack     # a different name
-  ENV_BUNDLE_PASS='<password>' bash \$EB pack                    # one-off, stored nowhere
 HELP
+  where_to_store
   exit 1
 }
 
@@ -229,8 +260,40 @@ cmd_pack() {
     printf '  %s\n' "${files[@]}"
   fi
 
-  local pass
-  pass="$(get_pass)" || no_pass_help
+  # Which password. An EXISTING archive decides it: packing with anything other
+  # than a password that opens it is a ROTATION — every teammate is locked out
+  # until they are given the new one — and must never happen as a side effect.
+  local pass src
+  if [ -f "$ARCHIVE" ]; then
+    if [ "${ENV_BUNDLE_ROTATE:-0}" = 1 ]; then
+      [ -n "${ENV_BUNDLE_PASS:-}" ] || die "ENV_BUNDLE_ROTATE=1 needs the NEW password in ENV_BUNDLE_PASS"
+      pass="$ENV_BUNDLE_PASS"; src='$ENV_BUNDLE_PASS'
+      warn "ROTATION: $ARCHIVE is being re-encrypted with a NEW password. Every teammate needs"
+      warn "the new one, and the old archives in git history still open with the old one."
+    elif [ -n "${ENV_BUNDLE_PASS:-}" ]; then
+      "$SZ" t -p"$ENV_BUNDLE_PASS" "$ARCHIVE" >/dev/null 2>&1 \
+        || die "\$ENV_BUNDLE_PASS does not open the current $ARCHIVE — packing with it would CHANGE the password. If that is the intent, it is a rotation: ENV_BUNDLE_ROTATE=1 ENV_BUNDLE_PASS=<new> bash \$EB pack"
+      pass="$ENV_BUNDLE_PASS"; src='$ENV_BUNDLE_PASS'
+    elif resolve_opening; then
+      pass="$PASS"; src="$PASS_SRC"
+    else
+      print_tried
+      printf 'ERROR: no password found opens the current %s. Packing now would silently change\n' "$ARCHIVE" >&2
+      printf '       its password (a rotation). Find THIS project'"'"'s password, or rotate on purpose:\n' >&2
+      printf '       ENV_BUNDLE_ROTATE=1 ENV_BUNDLE_PASS=<new> bash $EB pack\n\n' >&2
+      where_to_store
+      exit 1
+    fi
+  else
+    collect_candidates
+    [ "${#CAND_PASS[@]}" -gt 0 ] || no_pass_help
+    pass="${CAND_PASS[0]}"; src="${CAND_SRC[0]}"
+    # Nothing to test it against yet, and the nearest auth-info/ may be a sibling
+    # project's. Said on every first pack, because this is the moment it sticks.
+    warn "first pack: the password comes from $src and there is no archive to check it"
+    warn "against. Passwords are per project — confirm with the owner it is THIS project's."
+  fi
+  PACKED_PASS="$pass"; PACKED_SRC="$src"
 
   local f missing=0
   for f in "${files[@]}"; do
@@ -276,17 +339,25 @@ cmd_verify() {
     rc=1
   fi
 
-  # 2 — the password we hold must actually open this archive.
-  local pass
-  if pass="$(get_pass)"; then
-    if "$SZ" t -p"$pass" "$ARCHIVE" >/dev/null 2>&1; then
-      ok "stored password opens the archive"
+  # 2 — a password we hold must actually open this archive. After `pack` that is
+  #     the password it just packed with, not whatever resolves first: checking a
+  #     freshly packed archive with the same string that packed it proves only that
+  #     7-Zip works, which is how a re-encryption with the wrong project's password
+  #     used to pass as VERIFIED.
+  local src="nowhere"
+  if [ -n "${PACKED_PASS:-}" ]; then
+    if "$SZ" t -p"$PACKED_PASS" "$ARCHIVE" >/dev/null 2>&1; then
+      ok "the password from $PACKED_SRC opens the archive"; src="$PACKED_SRC"
     else
-      # Names the file the password ACTUALLY came from: the one message whose
-      # whole job is to say where to look must not hard-code $PASS_FILE.
-      printf 'FAIL:  the password in %s does NOT open %s\n' "$(pass_source)" "$ARCHIVE" >&2
+      printf 'FAIL:  the password from %s does NOT open %s\n' "$PACKED_SRC" "$ARCHIVE" >&2
       rc=1
     fi
+  elif resolve_opening; then
+    ok "the password from $PASS_SRC opens the archive"; src="$PASS_SRC"
+  elif [ "${#TRIED[@]}" -gt 0 ]; then
+    print_tried
+    printf 'FAIL:  no password found opens %s\n' "$ARCHIVE" >&2
+    rc=1
   else
     warn "no password available — skipped the 'correct password works' check"
   fi
@@ -300,7 +371,7 @@ cmd_verify() {
   fi
 
   [ "$rc" -eq 0 ] && printf 'VERIFIED: %s (%s entries, password from %s)\n' \
-    "$ARCHIVE" "$(cmd_list | wc -l | tr -d ' ')" "$(pass_source)"
+    "$ARCHIVE" "$(cmd_list | wc -l | tr -d ' ')" "$src"
   return "$rc"
 }
 
@@ -369,34 +440,60 @@ cmd_restore() {
     exit 1
   }
 
-  # Which files are already here. `.env` files are GITIGNORED, so an overwrite is
-  # not recoverable with `git checkout` — skipping by default is the only safe
-  # behaviour, and the owner is told exactly what was left alone.
-  local present=()
+  # The password is TESTED before anything is written. 7-Zip creates each output
+  # file before it discovers the password is wrong, so a failed `x` used to leave
+  # every env file behind EMPTY — and the next restore, with the right password,
+  # skipped them all as "already existed" and still reported OK.
+  local pass src
+  if resolve_opening; then
+    pass="$PASS"; src="$PASS_SRC"
+  else
+    print_tried
+    # RESTORE is the one command that may run without a stored password: a human
+    # at the keyboard can type it. `pack` must not — there the password BECOMES
+    # the archive, and a wrong one is only discovered by the next person.
+    [ -t 0 ] || { where_to_store; die "no password found opens $ARCHIVE — nothing was written"; }
+    read -rsp "Password for $ARCHIVE: " pass; printf '\n' >&2
+    "$SZ" t -p"$pass" "$ARCHIVE" >/dev/null 2>&1 || die "wrong password — nothing was written"
+    src="typed at the prompt"
+    where_to_store
+  fi
+
+  # Extract into a private directory inside .git, then move into place: whatever
+  # goes wrong midway, the working tree never holds a half-written env file.
+  RESTORE_TMP="$(mktemp -d "$(git rev-parse --absolute-git-dir)/env-bundle-restore.XXXXXX")" \
+    || die "cannot create a temp directory"
+  trap 'rm -rf "${RESTORE_TMP:-}"' EXIT
+  "$SZ" x -p"$pass" -o"$RESTORE_TMP" -y "$ARCHIVE" >/dev/null || die "extraction failed — nothing was written"
+
+  # `.env` files are GITIGNORED, so an overwrite is not recoverable with
+  # `git checkout` — skipping an existing file is the default, and the owner is
+  # told exactly what was left alone. The one exception is an EMPTY file whose
+  # archive copy is not: that is debris from a failed extraction, not an edit.
+  local e written=0 skipped=() emptied=() overwritten=()
   while IFS= read -r e; do
-    [ -n "$e" ] && [ -e "$e" ] && present+=("$e")
+    [ -n "$e" ] && [ -f "$RESTORE_TMP/$e" ] || continue
+    if [ -e "$e" ]; then
+      if [ "$force" = 1 ]; then overwritten+=("$e")
+      elif [ ! -s "$e" ] && [ -s "$RESTORE_TMP/$e" ]; then emptied+=("$e")
+      else skipped+=("$e"); continue; fi
+    fi
+    mkdir -p "$(dirname "$e")"
+    cp -p "$RESTORE_TMP/$e" "$e" || die "could not write $e"
+    written=$((written + 1))
   done <<<"$entries"
 
-  local mode='-aos'; [ "$force" = 1 ] && mode='-aoa'
-  local pass
-  if pass="$(get_pass)"; then
-    "$SZ" x -p"$pass" "$mode" -y "$ARCHIVE" >/dev/null || die "extraction failed (wrong password?)"
-  else
-    # RESTORE is the one command that may run without a stored password: a human
-    # is at the keyboard and 7-Zip prompts. `pack` must not — there the password
-    # BECOMES the archive, and a wrong one is only discovered by the next person.
-    warn "no stored password; 7-Zip will ask. Then put it in $SHARED_PASS_REL so the next restore does not have to."
-    "$SZ" x "$mode" "$ARCHIVE" || die "extraction failed (wrong password?)"
+  if [ "${#emptied[@]}" -gt 0 ]; then
+    warn "replaced ${#emptied[@]} EMPTY file(s) — debris from an earlier failed extraction:"
+    printf '  %s\n' "${emptied[@]}" >&2
   fi
-
-  if [ "${#present[@]}" -gt 0 ] && [ "$force" = 0 ]; then
-    warn "SKIPPED ${#present[@]} file(s) that already existed — local edits kept, NOT overwritten:"
-    printf '  %s\n' "${present[@]}" >&2
+  if [ "${#skipped[@]}" -gt 0 ]; then
+    warn "SKIPPED ${#skipped[@]} file(s) that already existed — local edits kept, NOT overwritten:"
+    printf '  %s\n' "${skipped[@]}" >&2
     warn "re-run with --force to overwrite them with the archive's copy"
-  elif [ "${#present[@]}" -gt 0 ]; then
-    ok "--force: overwrote ${#present[@]} existing file(s)"
   fi
-  ok "restored at $(pwd)"
+  [ "${#overwritten[@]}" -gt 0 ] && ok "--force: overwrote ${#overwritten[@]} existing file(s)"
+  ok "restored $written file(s) at $(pwd) (password from $src)"
   printf '%s\n' "$entries"
 }
 
@@ -424,7 +521,11 @@ Run at the repo root — paths inside the archive are relative:
 7zz x secrets/env-bundle.zip     # prompts for the password
 ```
 
-The password is **not in this repo**. Ask a teammate over a private channel.
+The password is **not in this repo**, and it is this project's own — other
+projects in the same workspace use different ones. Ask a teammate over a private
+channel, then keep it outside the repo where `/agl-env-bundle` finds it: a line
+`PASSWORD=...` in `auth-info/zip.<repo-folder-name>.env` in any directory above
+the clone (`auth-info/zip.env` is for a group of projects that share one).
 No `7zz`? macOS: `brew install sevenzip` · Debian/Ubuntu: `apt install p7zip-full`.
 
 ## Repack (after any env file changes)

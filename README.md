@@ -160,7 +160,12 @@ inventory** by default, because the way this pattern really fails is a new env
 file missing from a hand-typed list — the pack succeeds, the archive verifies,
 and the next clone is quietly short one secret. An undeclared gap between the
 archive and what is on disk **fails the pack**; leaving a file out has to be
-said out loud (`ENV_BUNDLE_EXCLUDE`). It also refuses to pack without a
+said out loud (`ENV_BUNDLE_EXCLUDE`). Passwords are **per project**: every
+candidate it finds (`auth-info/zip.<repo-folder>.env`, a group's
+`auth-info/zip.env`, …) is tested against the archive and only the one that
+opens it is used, so a sibling project's password is never borrowed and a
+repack never changes a bundle's password unless asked to
+(`ENV_BUNDLE_ROTATE=1`). It also refuses to pack without a
 resolved password (never invents or defaults to one), refuses a path that
 escapes the repo root, refuses to leave an unverified archive on disk, and
 hard-fails preflight on a public repo. `secrets/README.md` is generated from

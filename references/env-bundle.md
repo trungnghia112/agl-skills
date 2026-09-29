@@ -8,23 +8,31 @@ or when the owner asks what this pattern actually protects.
 The archive password is the only thing between a committed archive and every
 secret in the repo. **Never choose it for the owner, and never default.**
 
-First: is there already one? `scripts/env-bundle.sh` searches `$ENV_BUNDLE_PASS`,
-then `auth-info/zip.env` **upwards** from the repo root, then `PASS_ZIP=` in
-`.env.bak`. When it resolves one, use it and say which file it came from. Asking
-again invites a second password for a workspace that has one, and then half the
-bundles open with one string and half with another.
+**Passwords are per project.** A workspace holds many projects and, normally,
+many passwords — one per project, or one per group of projects that share an
+`auth-info/` directory on purpose. That is the design, not drift to clean up:
+one leaked string should open one project, not all of them.
 
-When it finds nothing it refuses to pack and says so. The first question is then
-**not** the menu below — it is *where their password file is*, because most of
-the time it exists and sits one directory further up, or under another name.
+First: is there already one? `scripts/env-bundle.sh` collects `$ENV_BUNDLE_PASS`,
+`PASS_ZIP=` in `.env.bak`, then — walking **upwards** from the repo root —
+`auth-info/zip.<repo-folder>.env` and `auth-info/zip.env` at each level. When an
+archive exists, the one that **opens it** is used and named; the nearest
+`zip.env` is frequently a sibling project's and is skipped when it does not open.
 
-Only once they confirm there is none, ask with a closed menu (never open-ended):
+When nothing is found (or nothing opens the archive) it refuses and lists what
+it tried. The first question is then **not** the menu below — it is *what this
+project's password is and where they keep it*, because most of the time it
+exists: in a password manager, in the repo's old `.env.bak`, or under another
+name.
+
+Only once they confirm this project has none yet, ask with a closed menu (never
+open-ended):
 
 > 1. **Generate a 24-byte random password** (`openssl rand -base64 24`) —
 >    strongest; must go straight into a password manager, nobody memorises it
 > 2. **You type one** — used exactly as given, not "improved"
-> 3. **Reuse the password you already use for another bundle in this workspace**
->    — one string opens every repo; store it once in `auth-info/zip.env`
+> 3. **Use the group's password** — only when this project belongs to a group
+>    that already shares one through its `auth-info/zip.env`
 >
 > I suggest option 1 — it is the only one whose strength does not depend on a
 > human having chosen well.
@@ -35,23 +43,26 @@ who gets the archive, and demo repos become real repos without anyone repacking.
 
 ## Storing it
 
-Write it to the shared store, so every repo in the workspace uses one password
-and the next run does not ask:
+Write it where the next run finds it, outside every git repository:
 
 ```
-PASSWORD=the-password        # <workspace>/auth-info/zip.env
+PASSWORD=the-password        # <any-dir-above-the-repo>/auth-info/zip.<repo-folder>.env   (this project)
+PASSWORD=the-password        # <group-dir>/auth-info/zip.env                               (a group that shares one)
 ```
 
-`auth-info/` sits outside every git repository, which is why it can live there
-in the clear. Then hand it to the owner for their password manager and for the
-team over a private channel — not in the repo, not in an issue, not in a commit
-message.
+Prefer the per-project name. A `zip.env` is read by every repo underneath it,
+so placing one at the workspace root makes it the first guess for projects it
+does not belong to — harmless now that candidates are tested, but it is how a
+workspace ends up looking like it "should" have one password. Then hand it to
+the owner for their password manager and for the team over a private channel —
+not in the repo, not in an issue, not in a commit message.
 
 The cost of this design is stated rather than hidden: **a clone alone is not
-enough** — the machine also needs `auth-info/`. The older trade-off, packing
-`.env.bak` (with `PASS_ZIP=`) *inside* the archive to make a lone clone
-self-sufficient, means anyone who opens the archive once knows the password
-permanently. Prefer the shared store.
+enough** — the machine also needs the `auth-info/` file (or a person who types
+the password once). The older habit of keeping `PASS_ZIP=` in a `.env.bak` that
+is packed *inside* the archive does not help a fresh clone at all — the file is
+not readable until the archive is already open — and anyone who opens the
+archive once learns the password permanently. Prefer an `auth-info/` file.
 
 ## Special characters
 
@@ -64,10 +75,14 @@ both of these.
 
 ## Rotation
 
-Changing the password is **not** a repack. Every teammate must be given the new
-one, and old archives in git history still open with the old one. To invalidate
-a leaked secret, rotate it at the provider (Firebase, Stripe, the API vendor) —
-changing the zip password does nothing.
+Changing the password is **not** a repack, and `pack` refuses to do it as a side
+effect: when no password it finds opens the current archive, it stops instead
+of re-encrypting with whatever it found (which, before this guard, could be a
+sibling project's password — and `verify` then reported VERIFIED). A deliberate
+rotation is spelled out: `ENV_BUNDLE_ROTATE=1 ENV_BUNDLE_PASS=<new>`. Every
+teammate must be given the new one, and old archives in git history still open
+with the old one. To invalidate a leaked secret, rotate it at the provider
+(Firebase, Stripe, the API vendor) — changing the zip password does nothing.
 
 ## Why not `zip -e`
 

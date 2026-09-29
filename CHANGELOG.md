@@ -7,6 +7,34 @@ mechanics.
 Versions follow [semver](https://semver.org): the bump reflects what you can
 observe, not the size of the diff. Each release is the `vX.Y.Z` tag on `main`.
 
+## [1.8.1] - 2026-09-29
+
+### Fixed
+- **`/agl-env-bundle` assumed one password per workspace; passwords are per
+  project.** It took the first `auth-info/zip.env` found above the repo as THE
+  password, and in a workspace of several projects that file usually belongs to
+  a sibling. Measured on a real workspace: that one file opened 3 of 20 bundles.
+  Three things followed from it, now fixed:
+  - **`pack` could silently change a bundle's password.** In a repo with its
+    own password, a repack re-encrypted the archive with the sibling project's,
+    and `verify` reported VERIFIED — it checked with the same string that had
+    just packed it. Everyone holding the real password was locked out, with no
+    error anywhere. `pack` now uses the password that OPENS the current archive,
+    refuses when none it finds does, and changes a password only when asked by
+    name: `ENV_BUNDLE_ROTATE=1 ENV_BUNDLE_PASS=<new>`.
+  - **A failed `restore` left every env file behind EMPTY**, and the next
+    restore — with the right password — skipped them all as "already existed"
+    and reported OK: a repo with an empty configuration and a green message.
+    The password is now tested before anything is written, extraction goes
+    through a private temp directory, and an empty file whose archive copy is
+    not is treated as debris and replaced (and reported).
+  - **The doc told the agent to recommend one password for the whole
+    workspace.** It now says the opposite: never suggest unifying passwords.
+- Every password candidate is collected and tested — `$ENV_BUNDLE_PASS`, the
+  repo's `.env.bak`, then upwards `auth-info/zip.<repo-folder>.env` (new: this
+  project's own) and `auth-info/zip.env` (a group's) — and the report names the
+  one that opened the archive and lists the ones that did not.
+
 ## [1.8.0] - 2026-09-11
 
 ### Added

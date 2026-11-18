@@ -174,18 +174,40 @@ the archive's real contents, so the doc cannot drift from the file list.
 Doctrine — password policy, threat model, and when to move to SOPS or a secret
 manager: `references/env-bundle.md`.
 
+## Gate — every correction becomes a check
+
+Prose rules are the weakest thing an agent has: advice the next session may not
+read. When you have to correct an agent, or a rule in CLAUDE.md keeps being
+broken, `/agl-gate` moves it into the repo as a check the build runs, so it holds
+on every machine and for every agent:
+
+```
+/agl-gate never write undefined to Firestore   # one rule: measure → enable → prove → PR
+/agl-gate audit                                 # classify every rule in the agent config
+/agl-gate fork-lint                             # lint a fork's own code in every build
+```
+
+It measures with the real tool before enabling anything (grep undercounts),
+drops a rule that reports correct code, freezes existing findings with ESLint
+bulk suppressions so the baseline only shrinks, plants a violation to prove the
+check fires, and logs each correction in `.agl/corrections.md`. The method and
+its order (code → static analysis → verification → prose → human review) follow
+the talk *All Code Is Slop (Except Mine)*; playbook, templates and the gotchas
+met in a real rollout: `references/gate.md`.
+
 ## Structure
 
 ```
 agl-skills/
 ├── .claude-plugin/plugin.json
-├── commands/        # 23 /agl-* commands (loaded only when invoked — near-zero background tokens)
+├── commands/        # 24 /agl-* commands (loaded only when invoked — near-zero background tokens)
 ├── agents/          # agl-codex-lane (delegation) + agl-advisor (second opinion)
 ├── references/
 │   ├── core-behaviors.md      # core rules every command follows
 │   ├── brain-format.md        # .agl/ spec + memory rules
 │   ├── definition-of-done.md  # the standing bar, separate from per-task acceptance
 │   ├── delegation.md          # architect ↔ lane doctrine, spec contract, verification
+│   ├── gate.md                # /agl-gate playbook: measure, freeze, prove, fork lint, gotchas
 │   └── fusion.md              # panel → judge doctrine (Track A/B + the agl upgrades)
 └── scripts/
     ├── env-bundle.sh # AES-256 env bundle runner (+ test-env-bundle.sh regression suite)

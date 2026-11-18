@@ -7,6 +7,24 @@ mechanics.
 Versions follow [semver](https://semver.org): the bump reflects what you can
 observe, not the size of the diff. Each release is the `vX.Y.Z` tag on `main`.
 
+## [1.9.0] - 2026-11-18
+
+### Added
+- **`/agl-gate` — every correction becomes a check the build runs.** When you
+  correct an agent, or a CLAUDE.md rule keeps being broken, the command moves it
+  into the repo instead of adding more prose: log it in `.agl/corrections.md`,
+  pick the cheapest check (an existing lint rule, `no-restricted-syntax`, a gate
+  script, a test), **measure with the real tool first** (grep said zero where
+  ESLint found 45), drop a rule that reports correct code, enable at zero or
+  freeze existing findings with ESLint bulk suppressions (the file can only
+  shrink), plant a violation to prove the check fires, wire it into `prebuild`,
+  and ship one PR that names what in-flight branches will hit. `audit` mode
+  classifies every rule in the agent config as gated / candidate / verify /
+  prose; `fork-lint` mode lints a fork's own code with fork-owned files only.
+  Built from a real rollout across a framework repo and three forks; the
+  playbook, templates and the gotchas met on the way are in
+  `references/gate.md`.
+
 ## [1.8.1] - 2026-09-29
 
 ### Fixed

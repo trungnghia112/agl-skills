@@ -30,6 +30,10 @@ if `$ARGUMENTS` asks something specific:
 | `/agl-ship` | Gate on evidence → changelog → push → auto-save the brain |
 | `/agl-next` | Suggest the next task from the backlog (check git before suggesting) |
 
+| Quality gates | |
+|---|---|
+| `/agl-gate <correction>` | Turn an agent correction or a prose rule into a check the build runs: measure with the real tool, freeze old findings (shrink-only), prove it fires, wire it into `prebuild`, ship a PR. `/agl-gate audit` classifies every rule in the agent config; `/agl-gate fork-lint` lints a fork's own code |
+
 | Environment | |
 |---|---|
 | `/agl-env-bundle` | Restore / set up / repack `secrets/env-bundle.zip` — an AES-256 archive of the repo's gitignored `.env` files, committed so a fresh clone gets its whole configuration back. Packs the full inventory by default, and an undeclared missing env file fails the pack |

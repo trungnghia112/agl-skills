@@ -18,7 +18,11 @@ relying on it.
    `## Contracts` entry using the REAL payload (not the typed interface) — the
    contract is the spec of correctness here. (Where a test is genuinely
    impossible — e.g. UAC prompt UX — say so and name the manual verification
-   that replaces it. Silence is not an option.)
+   that replaces it. Silence is not an option.) A crash or rollback criterion
+   is tested at the REAL boundary: an injected exception is not a killed
+   process, and a mocked transaction is not a database rollback. Verify with
+   the project's own runner and type checker; never install a new tool just to
+   check.
 4. **GREEN**: minimum code to pass. Boring solution preferred.
 5. Full suite + build. Regressions are YOUR problem now, not later.
 6. **Commit, surgically scoped**: stage only this task's files (+ its plan
@@ -34,7 +38,9 @@ relying on it.
 ## Auto mode (`/agl-build auto`)
 
 1. Require a plan (`plans/.../plan.md`); generate via /agl-plan logic if
-   only a spec exists; refuse if neither (→ /agl-spec).
+   only a spec exists; refuse if neither (→ /agl-spec). Reuse a plan only when
+   its `Source spec:` line names the spec in play; a mismatch or a missing
+   line → stop and ask which one is meant.
 2. Require a clean baseline: uncommitted changes unrelated to the plan →
    stop, ask the owner to commit/stash. Per-task commits must not absorb
    strangers' diffs or the clean-revert guarantee breaks.
@@ -54,7 +60,9 @@ relying on it.
    - a test won't go green or the build breaks without an obvious fix
      (→ switch to /agl-debug methodology)
    - the spec is ambiguous on a decision the plan didn't settle
-   On resume, `/agl-build auto` continues from the next pending task.
+   On resume, `/agl-build auto` continues from the next pending task, but
+   only on an approval recorded in an artifact (the plan, STATE.md, a commit):
+   an approval remembered from an earlier conversation is not an approval.
 7. End-of-run summary: tasks done, tests added, commits made, anything
    skipped or flagged.
 

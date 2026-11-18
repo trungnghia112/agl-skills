@@ -7,6 +7,54 @@ mechanics.
 Versions follow [semver](https://semver.org): the bump reflects what you can
 observe, not the size of the diff. Each release is the `vX.Y.Z` tag on `main`.
 
+## [1.10.0] - 2026-11-18
+
+Synced with [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills)
+from `be42637` (2026-08-11) to `39b723c` (2026-11-13): 427 upstream commits,
+reviewed and compressed into the existing commands rather than copied. Hooks and
+upstream-only tooling were left out (nothing here auto-activates).
+
+### Added
+- **`/agl-gate` guards the bar itself.** Five "cheapest road to green" moves
+  are now named and treated as the owner's call, never the agent's: a lowered
+  threshold, an easier test, a silenced checker **or a regenerated baseline**,
+  unfinished work, an undiscussed exception. `audit` mode writes
+  `.agl/CONSTRAINTS.md` (floor, enforced checks with their command, ratchets
+  with today's value, exceptions with an owner and an expiry). Checks are placed
+  by cost, external checkers are preferred, and a crashed tool counts as a
+  failure, not as clean.
+- **`/agl-review`**: a "did the bar move?" lens (the same five moves, compared
+  against `.agl/CONSTRAINTS.md`); test strength proven by experiment (invert one
+  condition, run, restore); a UI lens (WAI-ARIA patterns, loading / empty /
+  error / success / no-permission states, contrast never rounded up);
+  pre-existing defects reported apart from regressions.
+- **`/agl-audit`**: destructive file operations resolve symlinks and require an
+  allowlisted root and ownership evidence; trust follows who wrote a value, not
+  the channel; privacy (purpose, retention, real deletion, vendor agreements);
+  shared-store rate limits; a secret scan that never prints values; OWASP Top 10
+  cited with its year; CI inputs through `env:`; query plans, connection pools,
+  caching and a performance regression guard; idempotency keys derived from the
+  intent and claimed with a unique insert.
+- **`/agl-spec`**: a capability map when one ask bundles several modules; a
+  delta spec for changes to shipped features; a version label and a deferred list.
+- **`/agl-plan` / `/agl-build`**: a plan names its `Source spec:`, and build stops
+  on a mismatch; crash and rollback criteria are tested at the real boundary;
+  no tool is installed just to verify; a resumed `auto` run needs an approval
+  recorded in an artifact.
+- **`/agl-test`**: a gap is closed only when a mutant goes red.
+- **`/agl-save`**: a restart handoff records the exact verification commands and
+  their last outcome.
+- **Core behaviors and Definition of Done**: an approval from an earlier
+  conversation is memory, not consent; spend context on purpose; doc drift
+  judged by git order; append-only change logs; `entryPoint` on shared logs;
+  runbook-linked alerts; a rollback that has actually been run; an SLO
+  error-budget gate.
+
+### Changed
+- `/agl-audit` no longer recommends lexical path normalization everywhere: it
+  stays right for reads, and deletes, moves and overwrites now resolve the real
+  path first.
+
 ## [1.9.0] - 2026-11-18
 
 ### Added

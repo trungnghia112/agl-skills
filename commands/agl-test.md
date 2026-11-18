@@ -10,8 +10,9 @@ Read `${CLAUDE_PLUGIN_ROOT}/references/core-behaviors.md` (once per session).
    on this branch). Identify every behavior change.
 
 2. **Gap check**: each changed behavior gets a test that would FAIL if the
-   behavior regressed. Write the missing ones (RED→GREEN against current
-   code: temporarily break the code mentally — would this test catch it?).
+   behavior regressed. Write the missing ones, then prove they would: invert
+   one condition (or delete one line) in the code, run the related tests,
+   restore. A mutant that stays green means the test is still missing.
    Don't write tests that merely restate the implementation.
 
 3. **Run**: full suite + build. Report real numbers ("726/726", not "tests

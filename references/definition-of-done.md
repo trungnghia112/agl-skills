@@ -40,11 +40,26 @@ not a bar.
 - [ ] Public interfaces and user-facing behavior documented
 - [ ] Decisions worth preserving written to the brain as `decision-*` memories
 - [ ] Docs describe the current state in timeless language, not the change history
+- [ ] No doc drift: the last commit touching a doc is not older than the last
+      commit touching the code it describes (`git merge-base --is-ancestor`);
+      when the order cannot be determined, report "can't tell", never "current"
+- [ ] Changelogs and decision logs are append-only: a dated new entry, never a
+      rewrite of an earlier one
+- [ ] Edited prose keeps every number, unit, condition and caveat it had
 
 ### Ship-readiness — every release
 - [ ] Security reviewed wherever untrusted input, auth, or user data is touched
-- [ ] Critical new paths observable (logs/metrics) when the app has that surface
-- [ ] Rollback path named before anything risky is deployed
+- [ ] Critical new paths observable (logs/metrics) when the app has that surface;
+      a log written by several entry points (scheduler, replay endpoint, CLI)
+      carries an `entryPoint` field next to the correlation id, set at the
+      start of the run and propagated
+- [ ] Every alert links a three-line runbook (what it means / first check /
+      who to escalate to), updated when an incident closes
+- [ ] Rollback path named before anything risky is deployed, as a command or
+      runbook that has actually been run, not a guessed one (migrations included)
+- [ ] For a service with an SLO: above 20% error budget ship normally; 0-20%
+      slow rollouts and no high-risk changes; exhausted means freeze feature
+      work. A canary burning budget faster than baseline is a hold
 - [ ] Owner has approved — risk-gated changes require explicit sign-off
 
 ## Red flags

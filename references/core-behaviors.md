@@ -37,7 +37,17 @@ engineering discipline.
 7. **Trust but verify memory.** A recalled brain memory reflects when it was
    written. Before acting on one that names a file, flag, or behavior,
    confirm it still holds (git log, open the file). Same for STATE.md: the
-   `last_commit` anchor check is mandatory in /agl-recap.
+   `last_commit` anchor check is mandatory in /agl-recap. **An approval is
+   memory too:** one given in an earlier conversation counts only if an
+   artifact records it (the plan, STATE.md, a commit); otherwise ask again.
+
+7b. **Spend context on purpose.** Compact early, before the window forces it:
+   drop failed attempts, verbose tool output and replaced drafts, keeping a
+   one-line conclusion each. Protect the task definition, the live error and
+   the hard constraints, and keep task-critical material near the end of the
+   context. When handing a claim to a fresh-context reviewer, give it the
+   evidence (files, callers, guards, tests, including what contradicts the
+   claim), not your reasoning.
 
 ## Risk gates (hard stops — require explicit owner sign-off)
 

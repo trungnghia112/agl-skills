@@ -50,6 +50,12 @@ The weekly row count is the metric "corrections per week".
 Prefer making the mistake impossible (an API with no wrong way to call it, a
 directory layout that forbids the import) over detecting it afterwards.
 
+When a de facto external tool exists for the dimension (axe-core for
+accessibility, a vulnerability database scanner for dependencies, a real
+browser for web vitals, a secret scanner), use it instead of hand-rolling one.
+An external check is one the agent cannot argue with; a bar judged only by
+tests the agent itself wrote is circular.
+
 ## 3. Measure before enabling — never skip
 
 - Count violations with the **real tool over the real tree**, not grep. Grep
@@ -72,6 +78,27 @@ directory layout that forbids the import) over detecting it afterwards.
   only shrinks. A custom gate: a committed baseline that may only shrink.
 - **Wire it into what always runs** (`prebuild`, the fork's `prebuild:fork`,
   CI). A check that runs only when someone remembers is prose again.
+- **Place it by cost.** Seconds: the edit loop (types, lint, secrets). Under
+  ~90 s: task end (related tests). Minutes: review or CI. Scope to the diff
+  when the tool can. A check that stalls the agent gets switched off, and a
+  switched-off gate is worse than none: the bar still looks like it exists.
+
+## 4b. Never loosen the bar to get green
+
+Agents rarely craft loopholes; they take the cheapest road to green. These
+five moves LOWER the bar, so each is the owner's decision, never yours, and
+each is recorded as an exception with an owner and an expiry (default 90 days):
+
+1. a threshold or severity moved, a check removed or moved to a slower stage;
+2. a test made easier (`.skip`, a test deleted, an assertion removed);
+3. a checker silenced (`eslint-disable`, `@ts-ignore`, `istanbul ignore`, a
+   scanner's allow comment), **or the frozen baseline regenerated**
+   (`--suppress-all` re-run, a baseline file grown);
+4. unfinished work left standing (a stub that throws, an empty `catch`, a
+   `TODO` where the implementation goes);
+5. a new exception nobody discussed.
+
+Tightening is silent (prune suppressions, raise a ratchet); loosening is loud.
 
 ## 5. Prove it
 
@@ -79,8 +106,9 @@ All four, or it is not done:
 
 1. **It fires.** Plant one violation per rule inside the scanned tree: the check
    fails and names the file. Remove it: green.
-2. **It examined something.** An empty or skeleton tree exits non-zero, not
-   "OK, 0 findings".
+2. **It examined something, and its own failure is a failure.** An empty or
+   skeleton tree exits non-zero, not "OK, 0 findings"; a crashed or missing
+   tool exits non-zero too and never reads as clean.
 3. **It changed nothing else.** A new or wrapped config gives the SAME per-rule
    counts as the old one on the existing rules.
 4. **The repo still builds** with its real build command (some repos build per
@@ -115,6 +143,14 @@ every rule in one state, with evidence:
 
 Then offer the CANDIDATE rules with **zero** violations first: they become
 checks with no code changes at all.
+
+Write the result to `.agl/CONSTRAINTS.md` (template in references/gate.md),
+the project's quality bar as a contract that outlives the session: the
+**floor** (always on), **enforced** checks (rule, command, where it runs),
+**measured** values not yet enforced (today's number and the direction it may
+move), and **exceptions** (owner, expiry). Every number carries its reason.
+Add one line to the repo's agent config: `Read .agl/CONSTRAINTS.md before
+writing code; never weaken it to make a change pass.`
 
 ## Report
 

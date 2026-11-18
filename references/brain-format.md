@@ -12,6 +12,8 @@ truncated on read) and stale handover notes cause wrong-state reports.
 ```
 .agl/
 ├── CONSTITUTION.md # project principles — binding gates. Read by spec/plan/review. Optional but recommended.
+├── CONSTRAINTS.md  # optional — the quality bar a machine enforces (floor, checks, ratchets, exceptions). Written by /agl-gate.
+├── corrections.md  # optional — one row per correction of an agent; each becomes a check. Written by /agl-gate.
 ├── STATE.md        # small, always read at recap. The ONLY source of "now".
 ├── BRAIN.md        # memory index — one line per memory file. Read at recap.
 ├── memory/         # one durable fact per file. Read individually, on demand.
@@ -21,6 +23,15 @@ truncated on read) and stale handover notes cause wrong-state reports.
 └── fusion-runs/    # optional — /agl-fusion* provenance records (one .md per run). Written by
     └── ...         # scripts/fusion/save_brain.sh; never read at recap. Absent until first fusion run.
 ```
+
+## CONSTRAINTS.md and corrections.md
+
+Both are written by `/agl-gate` (format and template: `references/gate.md`).
+`CONSTRAINTS.md` is what a MACHINE enforces (every row names a command),
+where the constitution is what a reviewer judges. Read it before writing code,
+and treat any diff that weakens it (or a frozen baseline) as an exception
+needing the owner, never as a way to get green. `corrections.md` is the log
+that feeds it: one row each time the owner corrects an agent.
 
 ## CONSTITUTION.md
 

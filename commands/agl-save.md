@@ -28,7 +28,11 @@ Read `${CLAUDE_PLUGIN_ROOT}/references/brain-format.md`.
    - Delete (file + index line) any memory this session proved wrong.
 
 4. **Rewrite STATE.md** (this file is replaced, not appended):
-   - `## Now` — what's actually in flight, or "Nothing in flight."
+   - `## Now` — what's actually in flight, or "Nothing in flight." For work
+     in flight, a restart handoff: the decisions taken, the next task, the
+     working-tree state, and the exact verification commands with their last
+     outcome (`npm run build` → exit 0). A session that resumes without them
+     re-runs verification before trusting the baseline.
    - `## Next` — backlog table: add new items, remove shipped ones, keep IDs
      stable, every parked item gets a "Blocked on" reason.
    - `## Recently shipped` — prepend this session's ships, trim to 7.

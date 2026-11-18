@@ -36,6 +36,27 @@ Scope: `$ARGUMENTS`, else the current diff (staged + recent branch commits).
      signal, not a cap). When a change materially grows an already-large
      file, ask whether to decompose *first*, then add.
 
+   **Did the bar move?** Agents take the cheapest road to green, so read the
+   diff for the five loosening moves: a threshold, severity or check lowered
+   or moved to a slower stage; a test made easier (`.skip`, a deleted test, a
+   removed assertion); a checker silenced (`eslint-disable`, `@ts-ignore`,
+   `istanbul ignore`, a scanner allow comment, a regenerated or grown
+   baseline/suppressions file); work left unfinished (a stub that throws, an
+   empty `catch`, a `TODO` where the code goes); an undiscussed exception.
+   Compare `.agl/CONSTRAINTS.md` against the branch point. Each one is a
+   presumptive blocker unless the owner recorded an exception with an expiry.
+
+   **Are the tests strong enough? Prove it, do not judge it.** For a changed
+   behaviour, invert one condition (or delete one line) in the code, run the
+   related tests, restore. A mutant that stays green is a finding that names
+   the missing test.
+
+   **UI changes:** menus, dialogs, tabs, listboxes and comboboxes follow the
+   WAI-ARIA Authoring Practices patterns exactly; every surface handles
+   loading, empty, error, success and no-permission states; text contrast is
+   at least 4.5:1 (3:1 for large text, 24px or 18.67px bold), and a failing
+   ratio is never rounded up.
+
    **Propose the move, not just the problem.** A finding that only says
    "this is complex" leaves the author guessing. Name the remedy: replace a
    conditional chain with a typed model or dispatcher; collapse duplicate
@@ -56,7 +77,9 @@ Scope: `$ARGUMENTS`, else the current diff (staged + recent branch commits).
    suggestions are NOT bugs — never mix them into the correctness list.
 
 4. **Report**: confirmed findings (severity-ordered, each with evidence),
-   then simplifications, then what was checked and found clean. If
+   then simplifications, then what was checked and found clean. Label
+   **pre-existing** defects found in the base separately from regressions
+   this diff introduces: the author owns the second list, not the first. If
    everything is clean, say exactly that — do not manufacture findings to
    look thorough.
 
@@ -70,7 +93,8 @@ Scope: `$ARGUMENTS`, else the current diff (staged + recent branch commits).
    worse: a refactor that relocates complexity instead of reducing it; a file
    pushed past its size boundary with no decomposition; feature logic added to
    a shared module; a near-duplicate of a canonical helper; a silent fallback
-   hiding an unclear invariant.
+   hiding an unclear invariant; a loosened bar (above) with no recorded
+   exception.
 
 5. End with a numbered menu: fix all confirmed / fix selected / proceed to
    /agl-ship — one explicit recommendation. If fixes are applied, each gets

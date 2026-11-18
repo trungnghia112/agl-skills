@@ -44,6 +44,57 @@ a one-line reason to stay prose. Newest first.
 
 Status is `open`, `gated: <check>` or `prose: <why>`.
 
+## CONSTRAINTS.md
+
+`.agl/CONSTRAINTS.md` is the project's quality bar as a contract: written once,
+read by every agent, checked by the build, changed only in review. `/agl-gate
+audit` writes it; every later `/agl-gate` adds its row. (The constitution holds
+3-7 judgement principles; this file holds what a machine enforces.)
+
+```markdown
+# Constraints
+
+Last reviewed: <date> by <owner>
+
+## Floor (always on)
+- No new suppression comments (`eslint-disable`, `@ts-ignore`, `istanbul ignore`, scanner allow comments)
+- No stubs or empty `catch` left standing; no `TODO` where the implementation goes
+- No skipped or deleted test without a reason in the commit message
+- No secrets in source
+- This file and the frozen baselines are not weakened to make a change pass
+
+## Enforced
+| Rule | Checked by (exact command) | Runs at | Why this rule / number |
+| --- | --- | --- | --- |
+| Optional Firestore fields never `undefined` | `npm run lint:fs-no-undefined` | prebuild | Firestore rejects it at runtime, only on the absent path |
+
+## Measured, not yet enforced (ratchets)
+| Metric | Today | Direction | Tolerance |
+| --- | --- | --- | --- |
+| Frozen ESLint findings (fork code) | 105 | must not grow | 0 |
+
+## Exceptions
+| ID | Rule | Path | Reason | Owner | Expires |
+| --- | --- | --- | --- | --- | --- |
+```
+
+A row with a number and no command is an aspiration, not a constraint.
+
+**Defaults when the owner has no opinion** (each number states its reason):
+
+| Constraint | Default | Why |
+| --- | --- | --- |
+| Existing findings | frozen, must not grow | adopting needs no argument |
+| Coverage of changed lines | 80% | forces a test, still allows a config line |
+| Dependency vulnerabilities | nothing at high or above | below that is mostly noise |
+| Accessibility | zero critical or serious axe findings | moderate and minor are often debatable |
+| LCP / CLS | 2500 ms / 0.1 | Core Web Vitals "good" |
+| Exception lifetime | 90 days | long enough to plan the fix, short enough to remember |
+| Ratchet tolerance | 0.5% | absorbs drift from an unrelated file |
+
+A budget the codebase fails today is not a constraint, it is a red build people
+learn to ignore: record today's value as a ratchet instead.
+
 ## Measuring
 
 - **Real tool, real tree.** Run ESLint (or the gate) over the files it will
@@ -149,6 +200,7 @@ lints the code the fork's agents write. Measured on three forks: 105, 150 and
 | A smoke fails "gate not accounted for" | the repo keeps a registry of its gates (planted / cited / not applicable) | register the new gate there, with a planted case when it can have one |
 | Build fails "driver split-brain" | the repo builds per data driver | use the repo's command for its driver (`build:dc`, …) |
 | Machine stalls during lint + build + tests | heavy jobs overlapping | if the machine has a load check and a heavy-job lock, run every heavy step inside them |
+| A branch turns red after the check lands, and re-running `--suppress-all` would make it green | that is loosening the bar (gate §4b) | fix the finding, or the owner records an exception with an expiry |
 
 ## Order of rollout that worked
 
@@ -160,3 +212,12 @@ lints the code the fork's agents write. Measured on three forks: 105, 150 and
    capture evidence for the PR.
 4. Only then automation (scheduled fuzzing of a release, fix PRs from alerts),
    and only for loops that already pass step 3.
+
+## Sources
+
+- The talk *All Code Is Slop (Except Mine)*, Lauren Tan, AI Engineer Code
+  Summit, 2026: the trust pyramid, corrections become lint, verification first.
+- `constraint-driven-development` in
+  [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) (MIT):
+  CONSTRAINTS.md, the floor, guarding the bar against the cheap road to green,
+  placement by cost, external checks, defaults. Compressed here, not copied.

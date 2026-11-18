@@ -32,7 +32,7 @@ if `$ARGUMENTS` asks something specific:
 
 | Quality gates | |
 |---|---|
-| `/agl-gate <correction>` | Turn an agent correction or a prose rule into a check the build runs: measure with the real tool, freeze old findings (shrink-only), prove it fires, wire it into `prebuild`, ship a PR. `/agl-gate audit` classifies every rule in the agent config; `/agl-gate fork-lint` lints a fork's own code |
+| `/agl-gate <correction>` | Turn an agent correction or a prose rule into a check the build runs: measure with the real tool, freeze old findings (shrink-only), prove it fires, wire it into `prebuild`, ship a PR. `/agl-gate audit` classifies every rule in the agent config and writes `.agl/CONSTRAINTS.md`; `/agl-gate fork-lint` lints a fork's own code. Loosening the bar (a lowered threshold, a skipped test, a regenerated baseline) is the owner's call |
 
 | Environment | |
 |---|---|

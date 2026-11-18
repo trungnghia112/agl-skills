@@ -22,7 +22,9 @@ Read `${CLAUDE_PLUGIN_ROOT}/references/core-behaviors.md` (once per session).
    the choice. Pure internal work (no new external dependency) skips this — it is
    not time-sensitive.
 
-3. **Write the plan** to `plans/<YYMMDD-HHMM>-<slug>/plan.md`:
+3. **Write the plan** to `plans/<YYMMDD-HHMM>-<slug>/plan.md`, whose first
+   line under the title is `Source spec: <path>` (the spec it was built from,
+   so build, analyze and converge never pair a plan with the wrong spec):
    - Tasks of ≤ ~1 hour each, every task with:
      `acceptance:` (how we'll know it's done — concrete, checkable, and
      specific to THIS task: the standing bar every task clears anyway lives in

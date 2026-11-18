@@ -23,8 +23,20 @@ relevant memories (prior decisions, preferences) before asking anything.
    until ~90% confident you could defend the spec to a skeptic.
 
 3. **Surface assumptions** you're still making, explicitly, before writing.
+   Then pick the shape:
+   - **Several independently testable capabilities in one ask** → first a
+     capability map: a table of modules (stable kebab-case id, responsibility,
+     depends-on, no cycles) plus a build order. The owner approves the map;
+     then one spec per module (`docs/specs/<id>.md`).
+   - **A change to a feature that already shipped** → a delta spec, never an
+     edit of the shipped one: Objective / Current / New / Success criteria
+     (including what must NOT change) / Boundary deltas, `Status: proposed`.
+     Fold it into the original once it ships (`Status: implemented`).
+   - **The repo already uses a spec tool** (OpenSpec or similar) → keep its
+     format and location; these rules apply inside it.
 
-4. **Write the spec** to `docs/specs/<slug>.md`:
+4. **Write the spec** to `docs/specs/<slug>.md`, labelled with its version
+   (`V1`):
    - Problem & outcome (owner language: "user can X → we get Y")
    - Acceptance criteria — each gets a stable ID (`AC-1`, `AC-2`, …),
      independently checkable AND measurable (a number or a yes/no test, never
@@ -35,7 +47,9 @@ relevant memories (prior decisions, preferences) before asking anything.
      into P1/P2/P3, each an independently shippable increment — P1 alone must
      be a viable MVP, not half a feature. A non-sliceable feature stays one
      slice; don't invent ceremony.
-   - Out of scope — named, so /agl-build can refuse scope creep concretely
+   - Out of scope — named, so /agl-build can refuse scope creep concretely;
+     plus an `Out of scope (deferred to V2)` list where ideas that turn up
+     mid-build are parked instead of built
    - Risks & open questions — anything hitting a risk gate (payments, auth,
      irreversible ops) flagged here, not discovered mid-build
    - Verification plan — which evidence rung closes this (tests only? live
